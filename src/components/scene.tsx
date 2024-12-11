@@ -1,18 +1,22 @@
 'use client';
 import { OrbitControls } from '@react-three/drei';
+import { useThree } from '@react-three/fiber';
+import { useEffect } from 'react';
 
 export default function Scene() {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    camera.position.set(100, 90, 100);
+  }, [camera]);
+
   return (
     <>
-      {/* controller */}
+      <gridHelper args={[1000, 1000]} />
       <OrbitControls />
-    
-      {/* scene lights */}
+      <axesHelper args={[100]} />
       <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 20, 10]} intensity={2} castShadow />
-      <directionalLight position={[-10, 20, -10]} intensity={1} />
-      <directionalLight position={[-0, 20, 10]} intensity={1} />
-
+      <directionalLight position={[10, 10, 10]} intensity={3} />
     </>
   );
 }
