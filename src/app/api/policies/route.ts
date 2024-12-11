@@ -1,10 +1,7 @@
-import { readdirSync } from 'fs';
-import { join } from 'path';
+import { list } from '@vercel/blob';
 
-const ignore = ['__MACOSX', '.DS_Store']
 
 export async function GET() {
-  const directoryPath = join(process.cwd(), 'uploads');
-  const fileNames = readdirSync(directoryPath).filter(fileName => !ignore.includes(fileName));
-  return Response.json(fileNames);
+  const l = await list()
+  return Response.json(l.blobs);
 }

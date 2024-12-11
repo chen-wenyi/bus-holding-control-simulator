@@ -1,4 +1,5 @@
 'use client';
+import { ListBlobResultBlob } from '@vercel/blob';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -7,11 +8,11 @@ import { Input } from './ui/input';
 
 export default function UploadForm() {
   const { pending } = useFormStatus();
-  const [policies, setPolicies] = useState<string[]>([]);
+  const [policies, setPolicies] = useState<ListBlobResultBlob[]>([]);
   useEffect(() => {
     if (pending === false) {
       axios
-        .get<string[]>('/api/policies')
+        .get<ListBlobResultBlob[]>('/api/policies')
         .then(({ data }) => setPolicies(data));
     }
   }, [pending]);
@@ -23,7 +24,7 @@ export default function UploadForm() {
   return (
     <>
       <div className='flex justify-center items-center'>
-        <Input type='file' name='file' required />
+        <Input type='file' accept='.zip' name='file' required />
         <Button type='submit' className='m-4' disabled={pending}>
           upload
         </Button>
@@ -32,9 +33,9 @@ export default function UploadForm() {
       <div>
         <div className='p-4'>Policies</div>
         {policies.map((p) => (
-          <div key={p}>
-            <Button variant='ghost' onClick={() => onPolicyClicked(p)}>
-              <span className='text-xs'>{p}</span>
+          <div key={p.pathname}>
+            <Button variant='ghost' onClick={() => onPolicyClicked(p.pathname)}>
+              <span className='text-xs'>{p.pathname.replace('policies/', '')}</span>
             </Button>
           </div>
         ))}
