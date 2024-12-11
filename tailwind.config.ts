@@ -5,7 +5,6 @@ export default {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./public/**/*.html",
   ],
   theme: {
     extend: {
@@ -13,16 +12,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
-      height: {
-        screen: "100vh",
-      },
-      width: {
-        screen: "100vw",
-      },
     },
   },
-  plugins: [
-    // require('@tailwindcss/forms'),
-    // require('@tailwindcss/typography'),
-  ],
+  plugins: [],
 } satisfies Config;
