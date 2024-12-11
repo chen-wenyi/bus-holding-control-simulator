@@ -5,7 +5,12 @@ import * as THREE from 'three';
 import { CatmullRomCurve3, DoubleSide } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-export function Bus({ curve }: { curve: CatmullRomCurve3 }) {
+interface BusProps {
+  curve: CatmullRomCurve3;
+  scale?: number;
+}
+
+export function Bus({ curve, scale = 1 }: BusProps) {
   const busRef = useRef<THREE.Mesh>(null!);
   const [progress, setProgress] = useState(0);
 
@@ -23,10 +28,10 @@ export function Bus({ curve }: { curve: CatmullRomCurve3 }) {
 
   return (
     <mesh ref={busRef}>
-      <group position={[3.5, 0, 8]}>
+      <group position={[0, 0, 0]}>
         <primitive
           object={gltf.scene}
-          scale={0.0001}
+          scale={scale}
           rotation={[0, Math.PI, 0]}
         />
         <meshBasicMaterial side={DoubleSide} />
