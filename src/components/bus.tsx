@@ -10,7 +10,7 @@ export function Bus({ curve }: { curve: CatmullRomCurve3 }) {
   const [progress, setProgress] = useState(0);
 
   useFrame((_, delta) => {
-    const newProgress = (progress + delta * 0.1) % 1;
+    const newProgress = (progress + delta * 0.04) % 1;
     setProgress(newProgress);
 
     const position = curve.getPointAt(newProgress);
