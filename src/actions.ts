@@ -3,6 +3,7 @@
 import { put } from '@vercel/blob';
 import AdmZip from 'adm-zip';
 import Papa from 'papaparse';
+import { OutputDict, PolicyOutputData, PorcessedPolicyOutputData } from './types';
 
 const processZipFileToJson = (buffer: Buffer) => {
   try {
@@ -10,44 +11,29 @@ const processZipFileToJson = (buffer: Buffer) => {
     const zipEntries = zip.getEntries();
     const map: { [key: number]: PorcessedPolicyOutputData[] } = {};
 
-    zipEntries.forEach(entry => {
+    zipEntries.forEach((entry) => {
       const fileName = entry.entryName;
       if (!fileName.includes('__MACOSX') && fileName.includes('.csv')) {
         const res = getProcessedData(entry.getData().toString('utf8'));
         map[res.timeId] = res.processedOutputData;
       }
     });
-    return normalizedStartTime(map)
+    return normalizedStartTime(map);
   } catch (err) {
     console.error('Error unzipping file:', err);
   }
 };
 
-interface PolicyOutputData {
-  id: string;
-  time: string;
-  loc: string;
-  op: string;
-  stop: string;
-}
-
-interface PorcessedPolicyOutputData {
-  from: string;
-  to: string;
-  duration: number;
-  boarding: number;
-}
-
-const normalizedStartTime = (map: { [key: number]: PorcessedPolicyOutputData[] } ) => {
-  const keys = Object.keys(map).map(k => parseInt(k))
+const normalizedStartTime = (map: OutputDict) => {
+  const keys = Object.keys(map).map((k) => parseInt(k));
   const offset = keys[0];
-  const processedKeys = keys.map(k => k-offset);
-  const newMap: { [key: number]: PorcessedPolicyOutputData[] } = {};
+  const processedKeys = keys.map((k) => k - offset);
+  const newMap: OutputDict = {};
   processedKeys.forEach((newKey, idx) => {
     newMap[newKey] = map[keys[idx]];
-  })
+  });
   return newMap;
-}
+};
 
 const replaceFirstLine = (fileContent: string, newHeader: string) => {
   const normalizedFileContent = fileContent
@@ -119,9 +105,13 @@ export async function uploadAction(formData: FormData) {
     throw new Error('No file uploaded');
   }
 
-  const outputName = file.name.split('.zip')[0] + '.json'
+  const outputName = file.name.split('.zip')[0] + '.json';
 
   const fileData = Buffer.from(await file.arrayBuffer());
 
-  await put(`policies/${outputName}`, JSON.stringify(processZipFileToJson(fileData)), { access: 'public' });
+  await put(
+    `policies/${outputName}`,
+    JSON.stringify(processZipFileToJson(fileData)),
+    { access: 'public' }
+  );
 }
