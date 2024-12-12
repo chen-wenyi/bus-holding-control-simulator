@@ -2,7 +2,7 @@ import { uploadAction } from "@/actions";
 import Form from 'next/form';
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import UploadForm from "./uploadForm2";
+import UploadForm from "./uploadForm";
 
 export default function Upload() {
   return (
