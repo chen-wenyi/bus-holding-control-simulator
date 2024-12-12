@@ -4,7 +4,7 @@ import { OutputDict } from '@/types';
 import { ListBlobResultBlob } from '@vercel/blob';
 import axios from 'axios';
 import { Bus, LoaderCircle, Waypoints } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -28,25 +28,28 @@ export default function SelectOutput() {
 
   const displayedOutput = currOutputName || 'Select Model Output';
 
-  useEffect(() => {
-    startTransition(async () => {
-      const { data } = await axios.get<ListBlobResultBlob[]>('/api/outputs');
-      setOutputs(data);
-    });
-  }, []);
+  const onOpenChange = (open: boolean) => {
+    setOpen(open);
+    if (open) {
+      startTransition(async () => {
+        const { data } = await axios.get<ListBlobResultBlob[]>('/api/outputs');
+        setOutputs(data);
+      });
+    }
+  }
 
   const onOutputClicked = async (blob: ListBlobResultBlob) => {
     const { data } = await axios.get<OutputDict>('/api/output', {
       params: { outputUrl: blob.downloadUrl },
     });
     setCurrOutput(data);
-    setCurrOutputName(blob.pathname.replace('policies/', ''));
+    setCurrOutputName(blob.pathname.replace('outputs/', ''));
     setOpen(false);
   };
 
   return (
     <div className='flex flex-col justify-center items-center w-[85%]'>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogTrigger className='w-full'>
           <Button className='w-full' variant='outline'>
             <div title={displayedOutput} className='truncate'>
@@ -63,16 +66,18 @@ export default function SelectOutput() {
             {isPending ? (
               <LoaderCircle className='animate-spin duration-1000 ml-4' />
             ) : (
-              outputs.map((o) => (
-                <div className='flex' key={o.pathname}>
-                  <Button variant='ghost' onClick={() => onOutputClicked(o)}>
-                    <span className='text-xs'>
-                      {o.pathname.replace('policies/', '')}
-                    </span>
-                  </Button>
-                  <hr />
-                </div>
-              ))
+              outputs
+                .filter((output) => output.pathname.includes('outputs'))
+                .map((o) => (
+                  <div className='flex' key={o.pathname}>
+                    <Button variant='ghost' onClick={() => onOutputClicked(o)}>
+                      <span className='text-xs'>
+                        {o.pathname.replace('outputs/', '')}
+                      </span>
+                    </Button>
+                    <hr />
+                  </div>
+                ))
             )}
           </div>
         </DialogContent>

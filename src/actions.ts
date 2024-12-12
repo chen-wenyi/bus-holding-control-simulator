@@ -110,7 +110,7 @@ export async function uploadAction(formData: FormData) {
   const fileData = Buffer.from(await file.arrayBuffer());
 
   await put(
-    `policies/${outputName}`,
+    `outputs/${outputName}`,
     JSON.stringify(processZipFileToJson(fileData)),
     { access: 'public' }
   );
