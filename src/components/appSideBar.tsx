@@ -1,18 +1,16 @@
-import { uploadAction } from '@/actions';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
-import Form from 'next/form';
-import UploadForm from './UploadForm';
+import SelectOutput from './selectOutput';
+import Upload from './upload';
 
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarContent>
+      <SidebarContent className='flex items-center'>
         <div className='text-base font-semibold text-center p-4'>
           Bus Holding Control Simulator
         </div>
-        <Form action={uploadAction}>
-          <UploadForm />
-        </Form>
+        <Upload />
+        <SelectOutput />
       </SidebarContent>
     </Sidebar>
   );
