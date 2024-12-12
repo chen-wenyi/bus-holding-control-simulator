@@ -1,3 +1,4 @@
+import Simulator from "@/components/simulator";
 
 export default function Home() {
   return (
@@ -5,7 +6,7 @@ export default function Home() {
       className='canvas-container'
       style={{ height: '100vh', width: '100vw' }}
     >
-      {/* <Simulator /> */}
+      <Simulator />
     </div>
   );
 }
