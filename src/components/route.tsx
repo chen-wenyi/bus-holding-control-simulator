@@ -23,9 +23,9 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
     stations.map(
       (station) =>
         new THREE.Vector3(
-          station.x * SCALE_FACTOR,
-          station.y + 33,
-          station.z * SCALE_FACTOR
+          station.position.x * SCALE_FACTOR,
+          station.position.y + 33,
+          station.position.z * SCALE_FACTOR
         )
     ),
     true
@@ -43,9 +43,9 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
             points={stations.map(
               (station) =>
                 new THREE.Vector3(
-                  station.x * SCALE_FACTOR,
-                  station.y + 33,
-                  station.z * SCALE_FACTOR
+                  station.position.x * SCALE_FACTOR,
+                  station.position.y + 33,
+                  station.position.z * SCALE_FACTOR
                 )
             )}
             color="red"

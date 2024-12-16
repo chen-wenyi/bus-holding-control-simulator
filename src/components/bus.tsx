@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import * as THREE from 'three';
 import { CatmullRomCurve3, DoubleSide } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
 export function Bus({ curve }: { curve: CatmullRomCurve3 }) {
   const busRef = useRef<THREE.Mesh>(null!);
@@ -11,21 +12,20 @@ export function Bus({ curve }: { curve: CatmullRomCurve3 }) {
   const isHoldingRef = useRef(false);
   const isHeldRef = useRef(false);
 
-  let holdTimer = 0; // Timer to hold progress at 50%
-  const duration = 10; // Total duration to complete the route
-  const holdDuration = 5; // Duration to hold at 50% progress
+  let holdTimer = 0;
+  const duration = 10;
+  const holdDuration = 5;
 
   useFrame((_, delta) => {
     if (progress >= 0.5 && !isHoldingRef.current && !isHeldRef.current) {
-      isHoldingRef.current = true;
-      holdTimer = holdDuration; // Set the hold timer to 3 seconds
+      isHoldingRef.current = false;
+      holdTimer = holdDuration;
     }
 
-    // If holding, decrement the holdTimer
-    if (isHoldingRef.current) {
+    if (holdTimer > 0) {
       holdTimer -= delta;
       if (holdTimer <= 0) {
-        isHoldingRef.current = false; // Stop holding after 3 seconds
+        isHoldingRef.current = false;
         isHeldRef.current = true;
       }
     }
@@ -44,16 +44,19 @@ export function Bus({ curve }: { curve: CatmullRomCurve3 }) {
     }
   });
 
-  const gltf = useLoader(GLTFLoader, 'yellow-bus/scene.gltf');
+  // Load the GLB file with DRACO support
+  const gltf = useLoader(GLTFLoader, '/assets/bus.glb', (loader) => {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('/draco-gltf/'); // Draco decoder path
+    if (loader instanceof GLTFLoader) {
+      loader.setDRACOLoader(dracoLoader);
+    }
+  });
 
   return (
     <mesh ref={busRef}>
       <group position={[3.5, 0, 8]}>
-        <primitive
-          object={gltf.scene}
-          scale={0.0001}
-          rotation={[0, Math.PI, 0]}
-        />
+        <primitive object={gltf.scene} scale={7.5} rotation={[0, Math.PI, 0]} />
         <meshBasicMaterial side={DoubleSide} />
       </group>
     </mesh>

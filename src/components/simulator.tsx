@@ -9,10 +9,12 @@ import RouteLine, { SCALE_FACTOR } from './route';
 import Scene from './scene';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { stations } from './stations';
+import BusStops from './busstop';
+
 
 // MapModel component for rendering the map
 function MapModel({ position, scale }: { position: [number, number, number]; scale: [number, number, number] }) {
-  const { scene } = useGLTF('/assets/CITY.glb');
+  const { scene } = useGLTF('/assets/CITY_1216.glb');
   return <primitive object={scene} position={position} scale={scale} />;
 }
 
@@ -33,15 +35,13 @@ function AdjustCamera({ mapPosition }: { mapPosition: [number, number, number] }
 }
 
 export default function Simulator() {
-  // Generate the scaled curve based on station coordinates
   const scaledCurve = new CatmullRomCurve3(
-    stations.map(
-      (station) =>
-        new Vector3(
-          station.x * SCALE_FACTOR,
-          station.y + 33, // Maintain height consistency
-          station.z * SCALE_FACTOR
-        )
+    stations.map((station) =>
+      new Vector3(
+        station.position.x * SCALE_FACTOR,
+        station.position.y + 33,
+        station.position.z * SCALE_FACTOR
+      )
     ),
     true
   );
@@ -76,6 +76,7 @@ export default function Simulator() {
         <Suspense fallback={null}>
           <MapModel position={[0, 0, 0]} scale={[4, 4, 4]} />
           <Bus curve={scaledCurve} />
+          <BusStops />
         </Suspense>
 
         {/* Route line */}
