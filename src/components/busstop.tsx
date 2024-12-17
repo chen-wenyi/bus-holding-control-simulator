@@ -7,10 +7,6 @@ import { stations } from './stations';
 
 const SCALE_FACTOR = 10;
 
-interface BusStopProps {
-  position: THREE.Vector3;
-}
-
 function SingleBusStop({ position, offset }: { position: THREE.Vector3; offset?: THREE.Vector3 }) {
   const gltf = useLoader(GLTFLoader, '/assets/bus-stop.glb');
   const clonedScene = gltf.scene.clone();
