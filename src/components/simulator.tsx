@@ -1,16 +1,16 @@
 'use client';
 
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
-import { Suspense, useEffect } from 'react';
-import { Vector3, CatmullRomCurve3 } from 'three';
+import { Suspense, useEffect, useState } from 'react';
+import { CatmullRomCurve3, Vector3 } from 'three';
 import { Bus } from './bus';
+import BusStops from './busstop';
+import { AnimatedCharacter } from './character';
 import { Legend } from './legend';
 import RouteLine, { SCALE_FACTOR } from './route';
 import Scene from './scene';
-import { OrbitControls, useGLTF } from '@react-three/drei';
 import { stations } from './stations';
-import BusStops from './busstop';
-import { AnimatedCharacter } from './character';
 
 const passengerData = [
   0, 3, 6, 8, 10, 9, 10, 10, 17, 18, 15, 15, 15, 15, 19, 19, 21, 22, 23, 23, 23, 23,
@@ -18,12 +18,22 @@ const passengerData = [
   41, 41, 0,
 ];
 
-function MapModel({ position, scale }: { position: [number, number, number]; scale: [number, number, number] }) {
+function MapModel({
+  position,
+  scale,
+}: {
+  position: [number, number, number];
+  scale: [number, number, number];
+}) {
   const { scene } = useGLTF('/assets/CITY_1216.glb');
   return <primitive object={scene} position={position} scale={scale} />;
 }
 
-function AdjustCamera({ mapPosition }: { mapPosition: [number, number, number] }) {
+function AdjustCamera({
+  mapPosition,
+}: {
+  mapPosition: [number, number, number];
+}) {
   const { camera, size } = useThree();
 
   useEffect(() => {
@@ -34,7 +44,23 @@ function AdjustCamera({ mapPosition }: { mapPosition: [number, number, number] }
   return null;
 }
 
+const mapPosition: [number, number, number] = [50, 300, 70]
+
 export default function Simulator() {
+  const [buses, setBuses] = useState<number[]>([]);
+
+  useEffect(() => {
+    let count = 0;
+    const i = setInterval(() => {
+      setBuses((v) => [...v, count++]);
+    }, 1500);
+
+    if (count === 59) {
+      clearInterval(i)
+    }
+  }, []);
+
+
   const scaledCurve = new CatmullRomCurve3(
     stations.map((station) =>
       new Vector3(
@@ -65,16 +91,19 @@ export default function Simulator() {
         style={{ width: '80vw', height: '100vh' }}
       >
         <OrbitControls maxPolarAngle={Math.PI / 3} minDistance={50} maxDistance={700} target={[30, 50, 150]} />
-        <AdjustCamera mapPosition={[40, 120, 120]} />
-        {/* <AdjustCamera mapPosition={[50, 300, 70]} /> */}
+        {/* <AdjustCamera mapPosition={[40, 120, 120]} /> */}
+        <AdjustCamera mapPosition={mapPosition} />
         <Scene />
         <Suspense fallback={null}>
           <MapModel position={[0, 0, 0]} scale={[4, 4, 4]} />
-          <Bus 
-            curve={scaledCurve} 
-            stations={stationPositions} 
-            passengerData={passengerData}
-          />
+          {buses.map(b => (
+            <Bus
+              key={b}
+              curve={scaledCurve} 
+              stations={stationPositions} 
+              passengerData={passengerData}
+            />
+          ))}
           <BusStops />
           <AnimatedCharacter modelPath="/assets/dadkid.glb" position={[32, 31.5, 80]} scale={6} />
           <AnimatedCharacter modelPath="/assets/man.glb" position={[-142, 31.5, 200]} scale={5} />
