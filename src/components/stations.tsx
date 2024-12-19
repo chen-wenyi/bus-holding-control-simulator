@@ -74,4 +74,5 @@ export const stations: bus_stations[] = [
   { id: 'Inflection20', position: new THREE.Vector3(-5, -0.56525, -5), type: 'Inflection' , offset: new THREE.Vector3(0, 0, 0) },
   { id: 'Station45', position: new THREE.Vector3(-2, -0.56525, -4.8), type: 'Station' , offset: new THREE.Vector3(0, 0, 6.3) },
   { id: 'Station46', position: new THREE.Vector3(3.5, -0.56525, -4.8), type: 'Station' , offset: new THREE.Vector3(0, 0, 6.3) },
+  { id: 'Station1', position: new THREE.Vector3(8, -0.56525, -4.9), type: 'Station', offset: new THREE.Vector3(0, 0, 6.3) },
 ];
