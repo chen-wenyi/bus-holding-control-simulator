@@ -26,7 +26,9 @@ function MapModel({
   scale: [number, number, number];
 }) {
   const { scene } = useGLTF('/assets/CITY_1216.glb');
-  return <primitive object={scene} position={position} scale={scale} />;
+  return scene ? (
+    <primitive object={scene} position={position} scale={scale} />
+  ) : null;
 }
 
 function AdjustCamera({
@@ -44,22 +46,31 @@ function AdjustCamera({
   return null;
 }
 
-const mapPosition: [number, number, number] = [50, 300, 70]
+const mapPosition: [number, number, number] = [50, 130, 70]
 
 export default function Simulator() {
-  const [buses, setBuses] = useState<number[]>([]);
+  const [buses, setBuses] = useState<{ id: string}[]>([]);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     let count = 0;
     const i = setInterval(() => {
-      setBuses((v) => [...v, count++]);
+      if (!isPaused && count < 59) {
+        // setBuses((v) => [...v, count]);
+        setBuses((v) => [...v, { id: `${count}`, index: count }]);
+        count++;
+      } else if (count >=59) {
+        clearInterval(i);
+        return;
+      } 
     }, 1500);
 
-    if (count === 59) {
-      clearInterval(i)
-    }
-  }, []);
+    return () => clearInterval(i);
+  }, [isPaused]);
 
+  const handleBusFinish = (busId: string) => {
+    setBuses((v) => v.filter((bus) => bus.id !== busId));
+  };
 
   const scaledCurve = new CatmullRomCurve3(
     stations.map((station) =>
@@ -90,15 +101,17 @@ export default function Simulator() {
         camera={{ fov: 65, near: 1, far: 2000 }}
         style={{ width: '80vw', height: '100vh' }}
       >
-        <OrbitControls maxPolarAngle={Math.PI / 3} minDistance={50} maxDistance={700} target={[30, 50, 150]} />
+        <OrbitControls maxPolarAngle={Math.PI / 3} minDistance={30} maxDistance={700} target={[30, 50, 150]} />
         {/* <AdjustCamera mapPosition={[40, 120, 120]} /> */}
         <AdjustCamera mapPosition={mapPosition} />
         <Scene />
         <Suspense fallback={null}>
           <MapModel position={[0, 0, 0]} scale={[4, 4, 4]} />
-          {buses.map(b => (
+          {buses.map((b) => (
             <Bus
-              key={b}
+              key={b.id}
+              // busIndex={b.index}
+              onFinish={() => handleBusFinish(b.id)}
               curve={scaledCurve} 
               stations={stationPositions} 
               passengerData={passengerData}
