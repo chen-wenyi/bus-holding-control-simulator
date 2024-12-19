@@ -1,12 +1,12 @@
 'use client';
+import { Html } from '@react-three/drei';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { CatmullRomCurve3 } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { Html } from '@react-three/drei';
 
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export function Bus({
   curve,
@@ -76,7 +76,7 @@ export function Bus({
   return (
     <>
       <mesh ref={busRef}>
-        <primitive object={gltf.scene} scale={7.5} rotation={[0, Math.PI, 0]} position={[3.5, 0, 4]} />
+        <primitive object={gltf.scene.clone()} scale={7.5} rotation={[0, Math.PI, 0]} position={[3.5, 0, 4]} />
         <Html position={[0, 18, 0]} center>
           <div
             style={{

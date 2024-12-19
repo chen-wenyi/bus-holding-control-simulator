@@ -36,7 +36,7 @@ export default function SelectOutput() {
         setOutputs(data);
       });
     }
-  }
+  };
 
   const onOutputClicked = async (blob: ListBlobResultBlob) => {
     const { data } = await axios.get<OutputDict>('/api/output', {
@@ -51,7 +51,7 @@ export default function SelectOutput() {
     <div className='flex flex-col justify-center items-center w-[85%]'>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogTrigger className='w-full'>
-          <Button className='w-full' variant='outline'>
+          <Button className='w-full' variant='outline' asChild>
             <div title={displayedOutput} className='truncate'>
               {displayedOutput}
             </div>
