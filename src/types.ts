@@ -10,7 +10,8 @@ export interface PorcessedPolicyOutputData {
   from: string;
   to: string;
   duration: number;
-  boarding: number;
+  dwell: number;
+  occupancy: [number, number];
 }
 
 export type OutputDict = { [key: number]: PorcessedPolicyOutputData[] };

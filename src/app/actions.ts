@@ -1,9 +1,9 @@
 'use server';
 
-import { put } from '@vercel/blob';
+import { del, put } from '@vercel/blob';
 import AdmZip from 'adm-zip';
 import Papa from 'papaparse';
-import { OutputDict, PolicyOutputData, PorcessedPolicyOutputData } from './types';
+import { OutputDict, PolicyOutputData, PorcessedPolicyOutputData } from '../types';
 
 const processZipFileToJson = (buffer: Buffer) => {
   try {
@@ -59,12 +59,12 @@ const getProcessedData = (content: string) => {
   let isLookingForStopFlag = true;
   policyOutputData.forEach((data) => {
     if (isLookingForStopFlag) {
-      if (parseInt(data.stop) !== -1) {
+      if (parseInt(data.stop) !== -1) { // looking for stop
         keyPointId.push(data.id);
         isLookingForStopFlag = false;
       }
     } else {
-      if (parseInt(data.stop) === -1) {
+      if (parseInt(data.stop) === -1) { // looking for dwell
         keyPointId.push(data.id);
         isLookingForStopFlag = true;
       }
@@ -75,23 +75,28 @@ const getProcessedData = (content: string) => {
 
   const res = { keyPointId, len: keyPointId.length };
 
+  let prevOccupancy = 0;
   keyPointId.forEach((id, idx) => {
     const data = policyOutputData.find((data) => data.id === id)!;
-
     if (data.stop !== '-1' && idx !== res.keyPointId.length - 1) {
-      const boardingId = keyPointId[idx + 1];
-      const boardingData = policyOutputData.find(
-        (data) => data.id === boardingId
+      const dwellId = keyPointId[idx + 1];
+      const dwellData = policyOutputData.find(
+        (data) => data.id === dwellId
       )!;
-      const boarding = parseInt(boardingData.time) - parseInt(data.time) - 1;
+      const dwell = parseInt(dwellData.time) - parseInt(data.time) - 1;
       const toStopId = keyPointId[idx + 2];
       const toStopData = policyOutputData.find((data) => data.id === toStopId)!;
-      const duration = parseInt(toStopData.time) - parseInt(boardingData.time);
+      const duration = parseInt(toStopData.time) - parseInt(dwellData.time);
+
+      const occupancy: [number, number] = [prevOccupancy, Number(data.op)]
+      prevOccupancy = Number(data.op)
+
       processedOutputData.push({
         from: data.stop,
         to: toStopData.stop,
-        boarding,
+        dwell,
         duration,
+        occupancy
       });
     }
   });
@@ -114,4 +119,8 @@ export async function uploadAction(formData: FormData) {
     JSON.stringify(processZipFileToJson(fileData)),
     { access: 'public' }
   );
+}
+
+export async function delOutputs(url: string) {
+  await del(url);
 }

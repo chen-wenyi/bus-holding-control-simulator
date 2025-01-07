@@ -1,10 +1,18 @@
 'use client';
 
+import { delOutputs } from '@/app/actions';
 import { OutputDict } from '@/types';
 import { ListBlobResultBlob } from '@vercel/blob';
 import axios from 'axios';
 import { Bus, LoaderCircle, Waypoints } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import {
+  MouseEvent,
+  startTransition,
+  useOptimistic,
+  useState,
+  useTransition,
+} from 'react';
+import { MdDelete, MdDeleteForever } from 'react-icons/md';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -19,7 +27,12 @@ export default function SelectOutput() {
   const [open, setOpen] = useState(false);
 
   const [outputs, setOutputs] = useState<ListBlobResultBlob[]>([]);
-  const [isPending, startTransition] = useTransition();
+  const [optimisedOutputs, updateOptimisedOutputs] = useOptimistic(
+    outputs,
+    (state, url: string) => state.filter((o) => o.url !== url)
+  );
+
+  const [isPending, startPendingTransition] = useTransition();
   const [currOutputName, setCurrOutputName] = useState('');
   const [currOutput, setCurrOutput] = useState<OutputDict>();
 
@@ -31,20 +44,31 @@ export default function SelectOutput() {
   const onOpenChange = (open: boolean) => {
     setOpen(open);
     if (open) {
-      startTransition(async () => {
+      startPendingTransition(async () => {
         const { data } = await axios.get<ListBlobResultBlob[]>('/api/outputs');
-        setOutputs(data);
+        startPendingTransition(() => setOutputs(data));
       });
     }
   };
 
   const onOutputClicked = async (blob: ListBlobResultBlob) => {
-    const { data } = await axios.get<OutputDict>('/api/output', {
+    const { data } = await axios.get<OutputDict>('/api/outputs', {
       params: { outputUrl: blob.downloadUrl },
     });
     setCurrOutput(data);
     setCurrOutputName(blob.pathname.replace('outputs/', ''));
     setOpen(false);
+  };
+
+  const onOutputDelete = async (url: string) => {
+    startTransition(async () => {
+      updateOptimisedOutputs(url);
+      await delOutputs(url);
+      startTransition(async () => {
+        const { data } = await axios.get<ListBlobResultBlob[]>('/api/outputs');
+        setOutputs(data);
+      });
+    });
   };
 
   return (
@@ -66,14 +90,15 @@ export default function SelectOutput() {
             {isPending ? (
               <LoaderCircle className='animate-spin duration-1000 ml-4' />
             ) : (
-              outputs
+              optimisedOutputs
                 .filter((output) => output.pathname.includes('outputs'))
-                .map((o) => (
-                  <div className='flex' key={o.pathname}>
+                .map((o, idx) => (
+                  <div className='flex' key={o.pathname + idx}>
                     <Button variant='ghost' onClick={() => onOutputClicked(o)}>
                       <span className='text-xs'>
                         {o.pathname.replace('outputs/', '')}
                       </span>
+                      <Delete onDelete={() => onOutputDelete(o.url)} />
                     </Button>
                     <hr />
                   </div>
@@ -82,16 +107,33 @@ export default function SelectOutput() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className='flex justify-around w-full my-2'>
+      <div className='flex flex-col items-center justify-around w-full my-2'>
         <div className='flex gap-2'>
-          <Bus />
+          <Bus />Buses:
           <div>{busNum}</div>
         </div>
         <div className='flex gap-2'>
-          <Waypoints />
+          <Waypoints />Stops:
           <div>{stopNum}</div>
         </div>
       </div>
     </div>
   );
 }
+
+const Delete = ({ onDelete }: { onDelete: () => void }) => {
+  const [onDeleteHover, setOnDeleteHover] = useState(false);
+  const onClick = (e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    onDelete();
+  };
+  return (
+    <div
+      onMouseOver={() => setOnDeleteHover(true)}
+      onMouseLeave={() => setOnDeleteHover(false)}
+      onClick={onClick}
+    >
+      {onDeleteHover ? <MdDeleteForever /> : <MdDelete />}
+    </div>
+  );
+};
