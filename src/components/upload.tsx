@@ -1,5 +1,8 @@
-import { uploadAction } from '@/actions';
+'use client';
+
+import { uploadAction } from '@/app/actions';
 import Form from 'next/form';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -12,8 +15,10 @@ import {
 import UploadForm from './uploadForm';
 
 export default function Upload() {
+  const [open, setOpen] = useState(false);
+  
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className='w-[85%]'>
         <Button className='w-full' variant='outline' asChild>
           <div>Upload Model Output</div>
@@ -27,7 +32,7 @@ export default function Upload() {
           </DialogDescription>
         </DialogHeader>
         <Form action={uploadAction}>
-          <UploadForm />
+          <UploadForm onUploaded={() => setOpen(false)} />
         </Form>
       </DialogContent>
     </Dialog>
