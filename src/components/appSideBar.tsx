@@ -1,4 +1,5 @@
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
+import InformationPanel from './informationPanel';
 import SelectOutput from './selectOutput';
 import Upload from './upload';
 
@@ -11,6 +12,7 @@ export function AppSidebar() {
         </div>
         <Upload />
         <SelectOutput />
+        <InformationPanel />
       </SidebarContent>
     </Sidebar>
   );

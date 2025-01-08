@@ -15,3 +15,19 @@ export interface PorcessedPolicyOutputData {
 }
 
 export type OutputDict = { [key: number]: PorcessedPolicyOutputData[] };
+
+export interface TimeElapsed {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  distance: number; // milliseconds
+}
+
+export interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  distance: number; // milliseconds
+}
