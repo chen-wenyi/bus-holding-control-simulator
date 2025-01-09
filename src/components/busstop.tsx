@@ -1,13 +1,19 @@
 'use client';
 import { useLoader } from '@react-three/fiber';
-import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useMemo } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { stations } from './stations';
 
 const SCALE_FACTOR = 10;
 
-function SingleBusStop({ position, offset }: { position: THREE.Vector3; offset?: THREE.Vector3 }) {
+function SingleBusStop({
+  position,
+  offset,
+}: {
+  position: THREE.Vector3;
+  offset?: THREE.Vector3;
+}) {
   const gltf = useLoader(GLTFLoader, '/assets/bus-stop.glb');
   const clonedScene = gltf.scene.clone();
 
@@ -23,7 +29,7 @@ function SingleBusStop({ position, offset }: { position: THREE.Vector3; offset?:
   );
 }
 
-export default function BusStops() {
+const BusStops = () => {
   const stationData = useMemo(
     () =>
       stations
@@ -39,8 +45,6 @@ export default function BusStops() {
     []
   );
 
-  console.log('Filtered Station Positions:', stationData);
-
   return (
     <>
       {stationData.map((station, index) => (
@@ -52,4 +56,6 @@ export default function BusStops() {
       ))}
     </>
   );
-}
+};
+
+export default BusStops;

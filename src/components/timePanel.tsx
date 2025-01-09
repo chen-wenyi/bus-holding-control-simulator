@@ -1,8 +1,9 @@
 'use client';
 
 import useTimer from '@/hooks/useTimer';
-import { debounce, formatTime, getDetailedTime } from '@/lib/utils';
+import { formatTime, getDetailedTime } from '@/lib/utils';
 import { useSimStore } from '@/store/useSimStore';
+import { debounce } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import { RiSpeedFill } from 'react-icons/ri';
 import { Button } from './ui/button';
@@ -14,8 +15,11 @@ export default function TimePanel() {
   );
   const startSimulate = useSimStore((state) => state.startSimulate);
   const timer = useSimStore((state) => state.timer);
-  const updatenextBusIndex = useSimStore((state) => state.updatenextBusIndex);
-  const operationBuses = useSimStore((state) => state.busOperation.buses);
+  const updateNextBusIndex = useSimStore((state) => state.updateNextBusIndex);
+  const operationBuses = useSimStore((state) => state.busOperation.busesOnRoad);
+  const dispatchedBuses = useSimStore(
+    (state) => state.busOperation.dispatchedBuses
+  );
   const setTimerMultiplier = useSimStore((state) => state.setTimerMultiplier);
 
   const { nextBusIndex, multiplier } = timer;
@@ -50,9 +54,9 @@ export default function TimePanel() {
       timeElapse &&
       nextBusTime < timeElapse.distance
     ) {
-      updatenextBusIndex();
+      updateNextBusIndex();
     }
-  }, [nextBusIndex, nextBusTime, timeElapse, updatenextBusIndex]);
+  }, [nextBusIndex, nextBusTime, timeElapse, updateNextBusIndex]);
 
   return (
     <div className='flex flex-col p-4 w-full'>
@@ -99,7 +103,10 @@ export default function TimePanel() {
               </div>
 
               <div className='flex items-center justify-center text-sm'>
-                Buse amount on road: {operationBuses.length}
+                Dispatched Buses: {dispatchedBuses.length}
+              </div>
+              <div className='flex items-center justify-center text-sm'>
+                Buses on road: {operationBuses.length}
               </div>
             </>
           )}

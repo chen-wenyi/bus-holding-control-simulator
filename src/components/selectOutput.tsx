@@ -114,7 +114,7 @@ export default function SelectOutput() {
       </Dialog>
       <div className='flex flex-col items-center justify-around w-full my-2'>
         <div className='flex gap-2'>
-          <Bus />
+          <Bus onClick={() => console.log(selectedOutput)} />
           Buses:
           <div>{selectedOutput?.busNum || '-'}</div>
         </div>

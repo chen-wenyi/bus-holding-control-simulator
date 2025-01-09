@@ -1,4 +1,4 @@
-import { TimeElapsed, TimeLeft } from '@/types';
+import { TimeElapsed } from '@/types';
 import { clsx, type ClassValue } from 'clsx';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -21,31 +21,6 @@ export function calculateTimeElapsed(distance: number): TimeElapsed {
   };
 }
 
-export function calculateTimeLeft(
-  timestamp: number,
-  multiplier: number
-): TimeLeft {
-  const now = dayjs(); // Current time
-  const target = dayjs(timestamp);
-
-  const diff = target.diff(now); // Difference in milliseconds
-
-  // If the time has passed, return zeroed values
-  if (diff <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, distance: 0 };
-  }
-
-  // Use day.js duration to get the time left in days, hours, minutes, and seconds
-  const duration = dayjs.duration(diff);
-  return {
-    days: duration.days(),
-    hours: duration.hours(),
-    minutes: duration.minutes(),
-    seconds: duration.seconds(),
-    distance: diff,
-  };
-}
-
 export function formatTime(time: number) {
   return String(time).padStart(2, '0');
 }
@@ -59,7 +34,7 @@ export const getDetailedTime = (seconds: number) => {
   };
 };
 
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
