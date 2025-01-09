@@ -2,19 +2,19 @@ import { calculateTimeElapsed } from '@/lib/utils';
 import { TimeElapsed } from '@/types';
 import { useEffect, useState } from 'react';
 
-export default function useTimer(timestamp?: number, multiplier: number = 1) {
-  const [timeElapse, setTimeElapse] = useState<TimeElapsed | null>(
-    timestamp ? calculateTimeElapsed(timestamp, multiplier) : null
+export default function useTimer(isStarted: boolean, multiplier: number) {
+  const [timeElapse, setTimeElapse] = useState<TimeElapsed>(
+    calculateTimeElapsed(-1)
   );
 
   useEffect(() => {
-    if (!timestamp) return;
+    if (!isStarted) return;
     const interval = setInterval(() => {
-      setTimeElapse(calculateTimeElapsed(timestamp, multiplier));
+      setTimeElapse(calculateTimeElapsed(timeElapse.distance));
     }, 1000 / multiplier);
 
     return () => clearInterval(interval);
-  }, [timestamp, timeElapse]);
+  }, [timeElapse, multiplier, isStarted]);
 
   return timeElapse;
 }

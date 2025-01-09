@@ -1,27 +1,109 @@
 'use client';
 
 import useTimer from '@/hooks/useTimer';
-import { useState } from 'react';
+import { debounce, formatTime, getDetailedTime } from '@/lib/utils';
+import { useSimStore } from '@/store/useSimStore';
+import { useCallback, useEffect, useState } from 'react';
+import { RiSpeedFill } from 'react-icons/ri';
 import { Button } from './ui/button';
+import { Slider } from './ui/slider';
 
 export default function TimePanel() {
-  const [currentTimestamp, setCurrentTimestamp] = useState<number>();
-  const timeElapse = useTimer(currentTimestamp, 1);
+  const busTimeTable = useSimStore(
+    (state) => state.selectedOutput?.busTimeTable
+  );
+  const startSimulate = useSimStore((state) => state.startSimulate);
+  const timer = useSimStore((state) => state.timer);
+  const updatenextBusIndex = useSimStore((state) => state.updatenextBusIndex);
+  const operationBuses = useSimStore((state) => state.busOperation.buses);
+  const setTimerMultiplier = useSimStore((state) => state.setTimerMultiplier);
+
+  const { nextBusIndex, multiplier } = timer;
+  const nextBusTime =
+    nextBusIndex !== -1 ? busTimeTable?.[nextBusIndex] : undefined;
+
+  const nextBusDetailedTime = nextBusTime
+    ? getDetailedTime(nextBusTime)
+    : undefined;
+
+  const outputName = useSimStore((state) => state.selectedOutput?.name);
+  const [isStarted, setStarted] = useState(false);
+  const timeElapse = useTimer(isStarted, multiplier);
 
   const onClick = () => {
-    setCurrentTimestamp(Date.now());
+    startSimulate();
+    setStarted(true);
   };
+
+  const onMultiplierChanged = useCallback(
+    debounce((value: [number]) => {
+      const [newMultiplier] = value;
+      setTimerMultiplier(newMultiplier);
+    }, 200),
+    [setTimerMultiplier]
+  );
+
+  useEffect(() => {
+    if (
+      nextBusIndex !== -1 &&
+      nextBusTime &&
+      timeElapse &&
+      nextBusTime < timeElapse.distance
+    ) {
+      updatenextBusIndex();
+    }
+  }, [nextBusIndex, nextBusTime, timeElapse, updatenextBusIndex]);
 
   return (
     <div className='flex flex-col p-4 w-full'>
-      {/* <div>{timeElapse.days} days</div> */}
-      <Button onClick={onClick}>Start Simulate</Button>
-      {timeElapse && (
-        <div className='flex items-center justify-center text-xl'>
-          <div>{String(timeElapse.hours).padStart(2, '0')}:</div>
-          <div>{String(timeElapse.minutes).padStart(2, '0')}:</div>
-          <div>{String(timeElapse.seconds).padStart(2, '0')}</div>
-        </div>
+      {outputName && (
+        <>
+          <Button onClick={onClick} disabled={isStarted}>
+            Start Simulate
+          </Button>
+          {timeElapse && (
+            <>
+              <div className='flex items-center justify-center text-xl my-2'>
+                <div>{formatTime(timeElapse.hours)}:</div>
+                <div>{formatTime(timeElapse.minutes)}:</div>
+                <div>{formatTime(timeElapse.seconds)}</div>
+              </div>
+              <div className='flex mb-2 justify-center items-center gap-4'>
+                <RiSpeedFill />
+                <div className='flex-1'>
+                  <Slider
+                    defaultValue={[multiplier]}
+                    max={1000}
+                    min={1}
+                    onValueChange={onMultiplierChanged}
+                    step={1}
+                  />
+                </div>
+                <div className='text-sm font-bold'>
+                  {multiplier}
+                  <span className='text-xs'>x</span>
+                </div>
+              </div>
+
+              <div className='flex items-center justify-center text-sm'>
+                <div className='px-2'>Next bus at</div>
+                {nextBusDetailedTime ? (
+                  <>
+                    <div>{formatTime(nextBusDetailedTime.hours)}:</div>
+                    <div>{formatTime(nextBusDetailedTime.minutes)}:</div>
+                    <div>{formatTime(nextBusDetailedTime.seconds)}</div>
+                  </>
+                ) : (
+                  <>-</>
+                )}
+              </div>
+
+              <div className='flex items-center justify-center text-sm'>
+                Buse amount on road: {operationBuses.length}
+              </div>
+            </>
+          )}
+        </>
       )}
     </div>
   );

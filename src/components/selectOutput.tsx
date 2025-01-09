@@ -1,6 +1,7 @@
 'use client';
 
 import { delOutputs } from '@/app/actions';
+import { useSimStore } from '@/store/useSimStore';
 import { OutputDict } from '@/types';
 import { ListBlobResultBlob } from '@vercel/blob';
 import axios from 'axios';
@@ -24,6 +25,9 @@ import {
 } from './ui/dialog';
 
 export default function SelectOutput() {
+  const setSelectedOutput = useSimStore((state) => state.setSelectedOutput);
+  const selectedOutput = useSimStore((state) => state.selectedOutput);
+
   const [open, setOpen] = useState(false);
 
   const [outputs, setOutputs] = useState<ListBlobResultBlob[]>([]);
@@ -33,13 +37,8 @@ export default function SelectOutput() {
   );
 
   const [isPending, startPendingTransition] = useTransition();
-  const [currOutputName, setCurrOutputName] = useState('');
-  const [currOutput, setCurrOutput] = useState<OutputDict>();
 
-  const busNum = currOutput ? Object.entries(currOutput).length : '-';
-  const stopNum = currOutput ? currOutput[0].length + 1 : '-';
-
-  const displayedOutput = currOutputName || 'Select Model Output';
+  const displayedOutput = selectedOutput?.name || 'Select Model Output';
 
   const onOpenChange = (open: boolean) => {
     setOpen(open);
@@ -55,8 +54,14 @@ export default function SelectOutput() {
     const { data } = await axios.get<OutputDict>('/api/outputs', {
       params: { outputUrl: blob.downloadUrl },
     });
-    setCurrOutput(data);
-    setCurrOutputName(blob.pathname.replace('outputs/', ''));
+    setSelectedOutput({
+      name: blob.pathname.replace('outputs/', ''),
+      value: data,
+      busTimeTable: Object.keys(data).map(Number),
+      buses: Object.values(data),
+      busNum: Object.entries(data).length,
+      stopNum: data[0].length + 1,
+    });
     setOpen(false);
   };
 
@@ -109,12 +114,14 @@ export default function SelectOutput() {
       </Dialog>
       <div className='flex flex-col items-center justify-around w-full my-2'>
         <div className='flex gap-2'>
-          <Bus />Buses:
-          <div>{busNum}</div>
+          <Bus />
+          Buses:
+          <div>{selectedOutput?.busNum || '-'}</div>
         </div>
         <div className='flex gap-2'>
-          <Waypoints />Stops:
-          <div>{stopNum}</div>
+          <Waypoints />
+          Stops:
+          <div>{selectedOutput?.stopNum || '-'}</div>
         </div>
       </div>
     </div>
