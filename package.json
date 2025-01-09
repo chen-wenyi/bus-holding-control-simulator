@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slider": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.4",
     "@react-three/drei": "^9.120.3",
     "@react-three/fiber": "^9.0.0-rc.1",
@@ -21,6 +24,8 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.468.0",
     "next": "15.0.4",
     "papaparse": "^5.4.1",
@@ -29,10 +34,12 @@
     "react-icons": "^5.4.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.171.0"
+    "three": "^0.171.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
+    "@types/lodash": "^4.17.14",
     "@types/node": "^20",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^19",

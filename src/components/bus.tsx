@@ -70,21 +70,28 @@ export function Bus({
     if (distance < stopThreshold) {
       setIsStopped(true);
       setCurrentPassengers(passengerData[currentStopIndex]);
-      // console.log(`Bus stopped at Station ${currentStopIndex} - Passengers: ${passengerData[currentStopIndex]}`);
+      console.log(
+        `Bus stopped at Station ${currentStopIndex} - Passengers: ${passengerData[currentStopIndex]}`
+      );
 
       setTimeout(() => {
         if (!isFinished) {
           setIsStopped(false);
           setCurrentStopIndex((prevIndex) => (prevIndex + 1) % stations.length);
         }
-      }, 200); //1000ms = 1s
+      }, 2000); //1000ms = 1s
     }
   });
 
   return (
     <>
       <mesh ref={busRef}>
-        <primitive object={gltf.scene.clone()} scale={7.5} rotation={[0, Math.PI, 0]} position={[3.5, 0, 4]} />
+        <primitive
+          object={gltf.scene.clone()}
+          scale={7.5}
+          rotation={[0, Math.PI, 0]}
+          position={[3.5, 0, 4]}
+        />
         <Html position={[0, 18, 0]} center>
           <div
             style={{

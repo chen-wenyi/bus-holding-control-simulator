@@ -16,7 +16,7 @@ import UploadForm from './uploadForm';
 
 export default function Upload() {
   const [open, setOpen] = useState(false);
-  
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className='w-[85%]'>
@@ -32,7 +32,7 @@ export default function Upload() {
           </DialogDescription>
         </DialogHeader>
         <Form action={uploadAction}>
-          <UploadForm onUploaded={() => setOpen(false)} />
+          <UploadForm onUploadedAction={() => setOpen(false)} />
         </Form>
       </DialogContent>
     </Dialog>

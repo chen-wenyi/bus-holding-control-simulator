@@ -4,7 +4,15 @@ import { stations } from './stations';
 
 const SCALE_FACTOR = 10;
 
-function DebugPoints({ points, color, visible }: { points: THREE.Vector3[]; color: string; visible?: boolean }) {
+function DebugPoints({
+  points,
+  color,
+  visible,
+}: {
+  points: THREE.Vector3[];
+  color: string;
+  visible?: boolean;
+}) {
   return (
     <>
       {visible &&
@@ -38,7 +46,7 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
     <>
       {visible && (
         <>
-          <Line points={points} color="blue" lineWidth={5} dashed={false} />
+          <Line points={points} color='blue' lineWidth={5} dashed={false} />
           <DebugPoints
             points={stations.map(
               (station) =>
@@ -48,10 +56,10 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
                   station.position.z * SCALE_FACTOR
                 )
             )}
-            color="red"
+            color='red'
             visible={visible}
           />
-          <DebugPoints points={points} color="black" visible={visible} />
+          <DebugPoints points={points} color='black' visible={visible} />
         </>
       )}
     </>
