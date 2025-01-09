@@ -12,13 +12,13 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { roadSectionCurves } from './stations';
 
 const curves = roadSectionCurves;
-const maxPassenger = 100;
 
 const getCurrentOccupancy = (
-  occupancy: PorcessedPolicyOutputData['occupancy']
+  occupancy: PorcessedPolicyOutputData['occupancy'],
+  passengerCapacity: number
 ) => {
   const rate = occupancy[1];
-  return Math.floor(rate * maxPassenger);
+  return Math.floor(rate * passengerCapacity);
 };
 
 export function Bus({
@@ -36,8 +36,11 @@ export function Bus({
   const isFinished = useRef(false);
   const [isDwelling, setIsDwelling] = useState(false);
   const hasDewelled = useRef(false);
+  const passengerCapacity = useSimStore(
+    (store) => store.busOperation.passengerCapacity
+  );
   const [occupancy, setOccupancy] = useState(
-    getCurrentOccupancy(operationData[0].occupancy)
+    getCurrentOccupancy(operationData[0].occupancy, passengerCapacity)
   );
 
   const gltf = useLoader(GLTFLoader, '/assets/bus.glb', (loader) => {
@@ -56,7 +59,7 @@ export function Bus({
       setIsDwelling(true);
       setTimeout(() => {
         setIsDwelling(false);
-        setOccupancy(getCurrentOccupancy(occupancy));
+        setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
       }, (dwell * 1000) / multiplier);
       hasDewelled.current = true;
       const position = curve.getPointAt(0);
