@@ -16,6 +16,7 @@ type SimStoreState = {
     nextBusIndex: number;
   };
   busOperation: {
+    passengerCapacity: number;
     dispatchedBuses: { value: PorcessedPolicyOutputData[]; id: number }[];
     busesOnRoad: { value: PorcessedPolicyOutputData[]; id: number }[];
   };
@@ -30,6 +31,7 @@ type SimStoreActions = {
   setTimerMultiplier: (multiplier: number) => void;
   updateNextBusIndex: () => void;
   removeOnRoadBus: (id: number) => void;
+  setPassengerCapacity: (value: number) => void;
 };
 
 type SimStore = SimStoreState & SimStoreActions;
@@ -38,7 +40,11 @@ export const useSimStore = create<SimStore>()((set, get) => ({
   debuge: false,
   selectedOutput: null,
   timer: { multiplier: 50, timetable: [], nextBusIndex: -1 },
-  busOperation: { busesOnRoad: [], dispatchedBuses: [] },
+  busOperation: {
+    passengerCapacity: 100,
+    busesOnRoad: [],
+    dispatchedBuses: [],
+  },
   toggleDebug: () => set({ debuge: !get().debuge }),
   setSelectedOutput: (selectedOutput) => set({ selectedOutput }),
   startSimulate: () => {
@@ -46,6 +52,7 @@ export const useSimStore = create<SimStore>()((set, get) => ({
     const onRoadBus = [{ id, value: get().selectedOutput!.buses[0] }];
     set({
       busOperation: {
+        ...get().busOperation,
         busesOnRoad: onRoadBus,
         dispatchedBuses: onRoadBus,
       },
@@ -66,6 +73,7 @@ export const useSimStore = create<SimStore>()((set, get) => ({
       const busesOnRoad = get().busOperation.busesOnRoad;
       set({
         busOperation: {
+          ...get().busOperation,
           busesOnRoad: [...busesOnRoad, { id, value: dispatchBus }],
           dispatchedBuses: [...busesOnRoad, { id, value: dispatchBus }],
         },
@@ -85,6 +93,14 @@ export const useSimStore = create<SimStore>()((set, get) => ({
       busOperation: {
         ...get().busOperation,
         busesOnRoad: get().busOperation.busesOnRoad.filter((b) => b.id !== id),
+      },
+    });
+  },
+  setPassengerCapacity: (value) => {
+    set({
+      busOperation: {
+        ...get().busOperation,
+        passengerCapacity: value,
       },
     });
   },

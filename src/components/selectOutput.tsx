@@ -14,6 +14,7 @@ import {
   useTransition,
 } from 'react';
 import { MdDelete, MdDeleteForever } from 'react-icons/md';
+import PassengerConfig from './passengerConfig';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -123,6 +124,7 @@ export default function SelectOutput() {
           Stops:
           <div>{selectedOutput?.stopNum || '-'}</div>
         </div>
+        <PassengerConfig />
       </div>
     </div>
   );
