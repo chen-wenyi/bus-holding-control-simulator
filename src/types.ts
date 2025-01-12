@@ -6,15 +6,15 @@ export interface PolicyOutputData {
   stop: string;
 }
 
-export interface PorcessedPolicyOutputData {
+export interface ProcessedPolicyOutputData {
   from: string;
   to: string;
   duration: number;
-  dwell: number;
+  dwell: number
   occupancy: [number, number];
 }
 
-export type OutputDict = { [key: number]: PorcessedPolicyOutputData[] };
+export type OutputDict = { [key: number]: ProcessedPolicyOutputData[] };
 
 export interface TimeElapsed {
   days: number;

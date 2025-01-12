@@ -18,7 +18,7 @@ function MapModel({
   position: [number, number, number];
   scale: [number, number, number];
 }) {
-  const { scene } = useGLTF('/assets/CITY_1216.glb');
+  const { scene } = useGLTF('/assets/CITY_0112.glb');
   return scene ? (
     <primitive object={scene} position={position} scale={scale} />
   ) : null;
@@ -43,7 +43,7 @@ function AdjustCamera({
   return null;
 }
 
-const mapPosition: [number, number, number] = [50, 130, 70];
+const mapPosition: [number, number, number] = [30, 160, 20];
 
 export default function Simulator() {
   const busesOnRoad = useSimStore((state) => state.busOperation.busesOnRoad);
@@ -60,7 +60,7 @@ export default function Simulator() {
           maxPolarAngle={Math.PI / 3}
           minDistance={30}
           maxDistance={700}
-          target={[30, 50, 150]}
+          target={[30, 130, 150]}
         />
         {/* <AdjustCamera mapPosition={[40, 120, 120]} /> */}
         <AdjustCamera mapPosition={mapPosition} />
@@ -81,12 +81,12 @@ export default function Simulator() {
             <Suspense fallback={null}>
               <AnimatedCharacter
                 modelPath='/assets/dadkid.glb'
-                position={[32, 31.5, 80]}
+                position={[37, 31.5, 87]}
                 scale={6}
               />
               <AnimatedCharacter
                 modelPath='/assets/man.glb'
-                position={[-142, 31.5, 200]}
+                position={[-132, 32, 200]}
                 scale={5}
               />
               <AnimatedCharacter
@@ -101,8 +101,8 @@ export default function Simulator() {
               />
               <AnimatedCharacter
                 modelPath='/assets/woman2.glb'
-                position={[187, 31.5, 200]}
-                scale={6}
+                position={[195, 31.5, 200]}
+                scale={5.8}
               />
               <AnimatedCharacter
                 modelPath='/assets/woman.glb'
@@ -121,7 +121,7 @@ export default function Simulator() {
               />
               <AnimatedCharacter
                 modelPath='/assets/programmer.glb'
-                position={[135, 31.5, 160]}
+                position={[132, 31.5, 168]}
                 scale={6}
               />
               <AnimatedCharacter
@@ -141,7 +141,7 @@ export default function Simulator() {
               />
               <AnimatedCharacter
                 modelPath='/assets/2longhairgirl.glb'
-                position={[83, 31.5, 93]}
+                position={[83, 31.4, 93]}
                 scale={6}
               />
               <AnimatedCharacter
@@ -151,17 +151,17 @@ export default function Simulator() {
               />
               <AnimatedCharacter
                 modelPath='/assets/1longhair.glb'
-                position={[-75, 31.5, 204]}
+                position={[-68, 31.5, 204]}
                 scale={6}
               />
               <AnimatedCharacter
                 modelPath='/assets/backpacker.glb'
-                position={[238, 41.3, 194]}
+                position={[238, 41.3, 200]}
                 scale={1.7}
               />
               <AnimatedCharacter
                 modelPath='/assets/punk_girl.glb'
-                position={[140, 31.5, 198]}
+                position={[148, 31.5, 205]}
                 scale={0.8}
               />
               <AnimatedCharacter
@@ -176,7 +176,7 @@ export default function Simulator() {
               />
               <AnimatedCharacter
                 modelPath='/assets/walkingphoneman.glb'
-                position={[-32, 31.5, 20]}
+                position={[-36, 31.5, 20]}
                 scale={0.2}
               />
               <AnimatedCharacter

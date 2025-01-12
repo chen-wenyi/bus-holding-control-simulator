@@ -1,8 +1,7 @@
 import { Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { stations } from './stations';
-
-const SCALE_FACTOR = 10;
+import { stations } from './stations2';
+import { SCALE_FACTOR } from './constants';
 
 function DebugPoints({
   points,
@@ -41,6 +40,7 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
   routeCurve.tension = 0.4;
 
   const points = routeCurve.getPoints(1000);
+  // console.log(stations.map(station => `${station.id}: ${station.position.x}, ${station.position.y}, ${station.position.z}`));
 
   return (
     <>

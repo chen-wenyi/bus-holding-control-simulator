@@ -3,18 +3,20 @@ import { useLoader } from '@react-three/fiber';
 import { useMemo } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { stations } from './stations';
-
-const SCALE_FACTOR = 10;
+import { stations } from './stations2';
+import { SCALE_FACTOR } from './constants';
 
 function SingleBusStop({
   position,
   offset,
+  isMainStation
 }: {
   position: THREE.Vector3;
   offset?: THREE.Vector3;
+  isMainStation: boolean;
 }) {
-  const gltf = useLoader(GLTFLoader, '/assets/bus-stop.glb');
+  const modelPath = isMainStation ? '/assets/buszero.glb' : '/assets/busstop.glb';
+  const gltf = useLoader(GLTFLoader, modelPath);
   const clonedScene = gltf.scene.clone();
 
   const adjustedPosition = position.clone();
@@ -40,7 +42,8 @@ const BusStops = () => {
             station.position.y + 44,
             station.position.z * SCALE_FACTOR
           ),
-          offset: station.offset, // 传递 offset
+          offset: station.offset,
+          isMainStation: station.id === 'Station1'
         })),
     []
   );
@@ -52,6 +55,7 @@ const BusStops = () => {
           key={`bus-stop-${index}`}
           position={station.position}
           offset={station.offset}
+          isMainStation={station.isMainStation}
         />
       ))}
     </>

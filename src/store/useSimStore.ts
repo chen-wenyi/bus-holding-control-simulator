@@ -1,4 +1,4 @@
-import { OutputDict, PorcessedPolicyOutputData } from '@/types';
+import { OutputDict, ProcessedPolicyOutputData } from '@/types';
 import { create } from 'zustand';
 
 type SimStoreState = {
@@ -7,7 +7,7 @@ type SimStoreState = {
     name: string;
     value: OutputDict;
     busTimeTable: number[];
-    buses: PorcessedPolicyOutputData[][];
+    buses: ProcessedPolicyOutputData[][];
     busNum: number;
     stopNum: number;
   } | null;
@@ -17,8 +17,8 @@ type SimStoreState = {
   };
   busOperation: {
     passengerCapacity: number;
-    dispatchedBuses: { value: PorcessedPolicyOutputData[]; id: number }[];
-    busesOnRoad: { value: PorcessedPolicyOutputData[]; id: number }[];
+    dispatchedBuses: { value: ProcessedPolicyOutputData[]; id: number }[];
+    busesOnRoad: { value: ProcessedPolicyOutputData[]; id: number }[];
   };
 };
 
@@ -27,7 +27,7 @@ type SimStoreActions = {
   setSelectedOutput: (
     selectedOutput: NonNullable<SimStoreState['selectedOutput']>
   ) => void;
-  startSimulate: () => void;
+  startSimulation: () => void;
   setTimerMultiplier: (multiplier: number) => void;
   updateNextBusIndex: () => void;
   removeOnRoadBus: (id: number) => void;
@@ -47,7 +47,7 @@ export const useSimStore = create<SimStore>()((set, get) => ({
   },
   toggleDebug: () => set({ debuge: !get().debuge }),
   setSelectedOutput: (selectedOutput) => set({ selectedOutput }),
-  startSimulate: () => {
+  startSimulation: () => {
     const id = get().selectedOutput!.busTimeTable[0];
     const onRoadBus = [{ id, value: get().selectedOutput!.buses[0] }];
     set({

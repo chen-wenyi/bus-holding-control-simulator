@@ -1177,7 +1177,7 @@ export const sections: bus_stations[][] = [
       type: 'Station',
       offset: new THREE.Vector3(0, 0, 6.3),
     },
-  ],
+  ]
 ];
 
 export const roadSectionCurves = sections.map((section) => {
