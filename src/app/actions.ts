@@ -3,13 +3,13 @@
 import { del, put } from '@vercel/blob';
 import AdmZip from 'adm-zip';
 import Papa from 'papaparse';
-import { OutputDict, PolicyOutputData, PorcessedPolicyOutputData } from '../types';
+import { OutputDict, PolicyOutputData, ProcessedPolicyOutputData } from '../types';
 
 const processZipFileToJson = (buffer: Buffer) => {
   try {
     const zip = new AdmZip(buffer);
     const zipEntries = zip.getEntries();
-    const map: { [key: number]: PorcessedPolicyOutputData[] } = {};
+    const map: { [key: number]: ProcessedPolicyOutputData[] } = {};
 
     zipEntries.forEach((entry) => {
       const fileName = entry.entryName;
@@ -54,7 +54,7 @@ const getProcessedData = (content: string) => {
 
   const policyOutputData = parsedData.data;
 
-  const processedOutputData: PorcessedPolicyOutputData[] = [];
+  const processedOutputData: ProcessedPolicyOutputData[] = [];
   const keyPointId: string[] = [];
   let isLookingForStopFlag = true;
   policyOutputData.forEach((data) => {

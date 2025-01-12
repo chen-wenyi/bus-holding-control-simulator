@@ -13,7 +13,7 @@ export default function TimePanel() {
   const busTimeTable = useSimStore(
     (state) => state.selectedOutput?.busTimeTable
   );
-  const startSimulate = useSimStore((state) => state.startSimulate);
+  const startSimulation = useSimStore((state) => state.startSimulation);
   const timer = useSimStore((state) => state.timer);
   const updateNextBusIndex = useSimStore((state) => state.updateNextBusIndex);
   const operationBuses = useSimStore((state) => state.busOperation.busesOnRoad);
@@ -35,7 +35,7 @@ export default function TimePanel() {
   const timeElapse = useTimer(isStarted, multiplier);
 
   const onClick = () => {
-    startSimulate();
+    startSimulation();
     setStarted(true);
   };
 
@@ -63,7 +63,7 @@ export default function TimePanel() {
       {outputName && (
         <>
           <Button onClick={onClick} disabled={isStarted}>
-            Start Simulate
+            Start Simulation
           </Button>
           {timeElapse && (
             <>
