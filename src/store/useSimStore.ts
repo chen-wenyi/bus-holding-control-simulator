@@ -37,7 +37,7 @@ type SimStoreActions = {
 type SimStore = SimStoreState & SimStoreActions;
 
 export const useSimStore = create<SimStore>()((set, get) => ({
-  debuge: false,
+  debuge: true,
   selectedOutput: null,
   timer: { multiplier: 50, timetable: [], nextBusIndex: -1 },
   busOperation: {
@@ -65,17 +65,19 @@ export const useSimStore = create<SimStore>()((set, get) => ({
   setTimerMultiplier: (multiplier) =>
     set({ timer: { ...get().timer, multiplier } }),
   updateNextBusIndex: () => {
+    const currBusIndex = get().timer.nextBusIndex;
+    const dispatchBus = get().selectedOutput!.buses[currBusIndex];
+    const busesOnRoad = get().busOperation.busesOnRoad;
+    const dispatchedBuses = get().busOperation.dispatchedBuses;
+    const id = get().selectedOutput!.busTimeTable[currBusIndex];
+
     if (get().timer.nextBusIndex < get().selectedOutput!.busNum - 1) {
-      const currBusIndex = get().timer.nextBusIndex;
-      const dispatchBus = get().selectedOutput!.buses[currBusIndex];
-      const id = get().selectedOutput!.busTimeTable[currBusIndex];
       const nextBusIndex = currBusIndex + 1;
-      const busesOnRoad = get().busOperation.busesOnRoad;
       set({
         busOperation: {
           ...get().busOperation,
           busesOnRoad: [...busesOnRoad, { id, value: dispatchBus }],
-          dispatchedBuses: [...busesOnRoad, { id, value: dispatchBus }],
+          dispatchedBuses: [...dispatchedBuses, { id, value: dispatchBus }],
         },
         timer: {
           ...get().timer,
@@ -85,6 +87,11 @@ export const useSimStore = create<SimStore>()((set, get) => ({
     } else {
       set({
         timer: { ...get().timer, nextBusIndex: -1 },
+        busOperation: {
+          ...get().busOperation,
+          busesOnRoad: [...busesOnRoad, { id, value: dispatchBus }],
+          dispatchedBuses: [...dispatchedBuses, { id, value: dispatchBus }],
+        },
       });
     }
   },

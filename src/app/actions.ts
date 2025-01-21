@@ -3,7 +3,11 @@
 import { del, put } from '@vercel/blob';
 import AdmZip from 'adm-zip';
 import Papa from 'papaparse';
-import { OutputDict, PolicyOutputData, ProcessedPolicyOutputData } from '../types';
+import {
+  OutputDict,
+  PolicyOutputData,
+  ProcessedPolicyOutputData,
+} from '../types';
 
 const processZipFileToJson = (buffer: Buffer) => {
   try {
@@ -15,6 +19,17 @@ const processZipFileToJson = (buffer: Buffer) => {
       const fileName = entry.entryName;
       if (!fileName.includes('__MACOSX') && fileName.includes('.csv')) {
         const res = getProcessedData(entry.getData().toString('utf8'));
+        if (res.processedOutputData.length > 45) {
+          const allFromStops = res.processedOutputData.map((d) => d.from);
+          const duplicates = allFromStops.filter((val, i) =>
+            allFromStops.includes(val, i + 1)
+          );
+          console.warn(
+            `${fileName} start with timestamp ${
+              res.timeId
+            } has more than 45 intervals. Duplicates keywords: ${duplicates.toString()}`
+          );
+        }
         map[res.timeId] = res.processedOutputData;
       }
     });
@@ -59,12 +74,14 @@ const getProcessedData = (content: string) => {
   let isLookingForStopFlag = true;
   policyOutputData.forEach((data) => {
     if (isLookingForStopFlag) {
-      if (parseInt(data.stop) !== -1) { // looking for stop
+      if (parseInt(data.stop) !== -1) {
+        // looking for stop
         keyPointId.push(data.id);
         isLookingForStopFlag = false;
       }
     } else {
-      if (parseInt(data.stop) === -1) { // looking for dwell
+      if (parseInt(data.stop) === -1) {
+        // looking for dwell
         keyPointId.push(data.id);
         isLookingForStopFlag = true;
       }
@@ -80,27 +97,24 @@ const getProcessedData = (content: string) => {
     const data = policyOutputData.find((data) => data.id === id)!;
     if (data.stop !== '-1' && idx !== res.keyPointId.length - 1) {
       const dwellId = keyPointId[idx + 1];
-      const dwellData = policyOutputData.find(
-        (data) => data.id === dwellId
-      )!;
+      const dwellData = policyOutputData.find((data) => data.id === dwellId)!;
       const dwell = parseInt(dwellData.time) - parseInt(data.time) - 1;
       const toStopId = keyPointId[idx + 2];
       const toStopData = policyOutputData.find((data) => data.id === toStopId)!;
       const duration = parseInt(toStopData.time) - parseInt(dwellData.time);
 
-      const occupancy: [number, number] = [prevOccupancy, Number(data.op)]
-      prevOccupancy = Number(data.op)
+      const occupancy: [number, number] = [prevOccupancy, Number(data.op)];
+      prevOccupancy = Number(data.op);
 
       processedOutputData.push({
         from: data.stop,
         to: toStopData.stop,
         dwell,
         duration,
-        occupancy
+        occupancy,
       });
     }
   });
-
   return { timeId: parseInt(timeId), processedOutputData };
 };
 

@@ -410,7 +410,7 @@ export const stations: bus_stations[] = [
     position: new THREE.Vector3(5.6, -0.56525, -4.9),
     type: 'Station',
     offset: new THREE.Vector3(0, 0, 6.3),
-  }
+  },
 ];
 
 export const sections: bus_stations[][] = [
@@ -1158,26 +1158,26 @@ export const sections: bus_stations[][] = [
       offset: new THREE.Vector3(6, 0, 0),
     },
   ],
-  [
-    {
-      id: 'Station46',
-      position: new THREE.Vector3(12.58, -0.2, -6.5),
-      type: 'Station',
-      offset: new THREE.Vector3(6, 0, 0),
-    },
-    {
-      id: 'Inflection20',
-      position: new THREE.Vector3(12, -0.2, -5.2),
-      type: 'Inflection',
-      offset: new THREE.Vector3(0, 0, 0),
-    },
-    {
-      id: 'Station1',
-      position: new THREE.Vector3(5.6, -0.56525, -4.9),
-      type: 'Station',
-      offset: new THREE.Vector3(0, 0, 6.3),
-    },
-  ]
+  // [
+  //   {
+  //     id: 'Station46',
+  //     position: new THREE.Vector3(12.58, -0.2, -6.5),
+  //     type: 'Station',
+  //     offset: new THREE.Vector3(6, 0, 0),
+  //   },
+  //   {
+  //     id: 'Inflection20',
+  //     position: new THREE.Vector3(12, -0.2, -5.2),
+  //     type: 'Inflection',
+  //     offset: new THREE.Vector3(0, 0, 0),
+  //   },
+  //   {
+  //     id: 'Station1',
+  //     position: new THREE.Vector3(5.6, -0.56525, -4.9),
+  //     type: 'Station',
+  //     offset: new THREE.Vector3(0, 0, 6.3),
+  //   },
+  // ]
 ];
 
 export const roadSectionCurves = sections.map((section) => {
