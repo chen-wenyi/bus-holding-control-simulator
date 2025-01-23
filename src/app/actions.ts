@@ -42,6 +42,7 @@ const processZipFileToJson = (buffer: Buffer) => {
 const normalizedStartTime = (map: OutputDict) => {
   const keys = Object.keys(map).map((k) => parseInt(k));
   const offset = keys[0];
+  console.log('offset:', offset)
   const processedKeys = keys.map((k) => k - offset);
   const newMap: OutputDict = {};
   processedKeys.forEach((newKey, idx) => {
@@ -72,12 +73,17 @@ const getProcessedData = (content: string) => {
   const processedOutputData: ProcessedPolicyOutputData[] = [];
   const keyPointId: string[] = [];
   let isLookingForStopFlag = true;
+
+  let prevStopId: undefined | string
   policyOutputData.forEach((data) => {
     if (isLookingForStopFlag) {
       if (parseInt(data.stop) !== -1) {
-        // looking for stop
-        keyPointId.push(data.id);
-        isLookingForStopFlag = false;
+        if (prevStopId !== data.stop) { // rule out the incorrect data
+          // looking for stop
+          keyPointId.push(data.id);
+          isLookingForStopFlag = false;
+          prevStopId = data.stop
+        }
       }
     } else {
       if (parseInt(data.stop) === -1) {
@@ -101,7 +107,7 @@ const getProcessedData = (content: string) => {
       const dwell = parseInt(dwellData.time) - parseInt(data.time) - 1;
       const toStopId = keyPointId[idx + 2];
       const toStopData = policyOutputData.find((data) => data.id === toStopId)!;
-      const duration = parseInt(toStopData.time) - parseInt(dwellData.time);
+      const duration = parseInt(toStopData.time) - parseInt(dwellData.time) + 1;
 
       const occupancy: [number, number] = [prevOccupancy, Number(data.op)];
       prevOccupancy = Number(data.op);
