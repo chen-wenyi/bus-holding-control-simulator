@@ -47,6 +47,7 @@ export default function TimePanel() {
 
   useEffect(() => {
     if (
+      status !== 'paused' &&
       nextBusIndex !== -1 &&
       nextBusTime &&
       timeElapse &&
@@ -64,6 +65,9 @@ export default function TimePanel() {
             <Button onClick={onStart}>Start Simulation</Button>
           ) : (
             <div className='flex items-center justify-center gap-4'>
+              <Button variant='destructive' onClick={onReset}>
+                Reset Simulation
+              </Button>
               {status === 'paused' ? (
                 <Button onClick={onStart}>Start</Button>
               ) : (
@@ -71,10 +75,6 @@ export default function TimePanel() {
                   Pause
                 </Button>
               )}
-
-              <Button variant='destructive' onClick={onReset}>
-                Reset Simulation
-              </Button>
             </div>
           )}
 
