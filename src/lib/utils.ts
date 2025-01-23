@@ -58,7 +58,8 @@ export function createCountdown(
   duration: number, // in milliseconds
   callbacks: CountdownCallbacks = {}
 ) {
-  let { onUpdate = () => {}, onComplete = () => {} } = callbacks;
+  const onUpdate = callbacks.onUpdate || (() => {});
+  let onComplete = callbacks.onComplete || (() => {});
 
   let startTime: number | null = null;
   let pausedTime: number | null = null;
