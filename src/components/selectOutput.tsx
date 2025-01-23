@@ -28,6 +28,7 @@ import {
 export default function SelectOutput() {
   const setSelectedOutput = useSimStore((state) => state.setSelectedOutput);
   const selectedOutput = useSimStore((state) => state.selectedOutput);
+  const state = useSimStore((state) => state);
 
   const [open, setOpen] = useState(false);
 
@@ -55,14 +56,7 @@ export default function SelectOutput() {
     const { data } = await axios.get<OutputDict>('/api/outputs', {
       params: { outputUrl: blob.downloadUrl },
     });
-    setSelectedOutput({
-      name: blob.pathname.replace('outputs/', ''),
-      value: data,
-      busTimeTable: Object.keys(data).map(Number),
-      buses: Object.values(data),
-      busNum: Object.entries(data).length,
-      stopNum: data[0].length + 1,
-    });
+    setSelectedOutput(blob.pathname.replace('outputs/', ''), data);
     setOpen(false);
   };
 
@@ -115,7 +109,7 @@ export default function SelectOutput() {
       </Dialog>
       <div className='flex flex-col items-center justify-around w-full my-2'>
         <div className='flex gap-2'>
-          <Bus onClick={() => console.log(selectedOutput)} />
+          <Bus onClick={() => console.log(state)} />
           Buses:
           <div>{selectedOutput?.busNum || '-'}</div>
         </div>

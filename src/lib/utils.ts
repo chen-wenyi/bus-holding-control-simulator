@@ -28,6 +28,7 @@ export function formatTime(time: number) {
 export const getDetailedTime = (seconds: number) => {
   const time = dayjs.duration(seconds, 'seconds');
   return {
+    days: time.days(),
     hours: time.hours(),
     minutes: time.minutes(),
     seconds: time.seconds(),

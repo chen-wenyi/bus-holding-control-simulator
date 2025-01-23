@@ -3,26 +3,26 @@
 import useTimer from '@/hooks/useTimer';
 import { formatTime, getDetailedTime } from '@/lib/utils';
 import { useSimStore } from '@/store/useSimStore';
-import { debounce } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
-import { RiSpeedFill } from 'react-icons/ri';
+import { useEffect } from 'react';
+import OperationProgress from './operationProgress';
+import Speedup from './speedup';
 import { Button } from './ui/button';
-import { Slider } from './ui/slider';
 
 export default function TimePanel() {
   const busTimeTable = useSimStore(
     (state) => state.selectedOutput?.busTimeTable
   );
   const startSimulation = useSimStore((state) => state.startSimulation);
+  const resetSimulation = useSimStore((state) => state.resetSimulation);
+  const pauseSimulation = useSimStore((state) => state.pauseSimulation);
   const timer = useSimStore((state) => state.timer);
+  const { nextBusIndex, status } = timer;
   const updateNextBusIndex = useSimStore((state) => state.updateNextBusIndex);
   const operationBuses = useSimStore((state) => state.busOperation.busesOnRoad);
   const dispatchedBuses = useSimStore(
     (state) => state.busOperation.dispatchedBuses
   );
-  const setTimerMultiplier = useSimStore((state) => state.setTimerMultiplier);
 
-  const { nextBusIndex, multiplier } = timer;
   const nextBusTime =
     nextBusIndex !== -1 ? busTimeTable?.[nextBusIndex] : undefined;
 
@@ -31,21 +31,19 @@ export default function TimePanel() {
     : undefined;
 
   const outputName = useSimStore((state) => state.selectedOutput?.name);
-  const [isStarted, setStarted] = useState(false);
-  const timeElapse = useTimer(isStarted, multiplier);
+  const timeElapse = useTimer();
 
-  const onClick = () => {
+  const onStart = () => {
     startSimulation();
-    setStarted(true);
   };
 
-  const onMultiplierChanged = useCallback(
-    debounce((value: [number]) => {
-      const [newMultiplier] = value;
-      setTimerMultiplier(newMultiplier);
-    }, 200),
-    [setTimerMultiplier]
-  );
+  const onPause = () => {
+    pauseSimulation();
+  };
+
+  const onReset = () => {
+    resetSimulation();
+  };
 
   useEffect(() => {
     if (
@@ -62,33 +60,28 @@ export default function TimePanel() {
     <div className='flex flex-col p-4 w-full'>
       {outputName && (
         <>
-          <Button onClick={onClick} disabled={isStarted}>
-            Start Simulation
-          </Button>
+          {status === 'idle' ? (
+            <Button onClick={onStart}>Start Simulation</Button>
+          ) : (
+            <div className='flex items-center justify-center gap-4'>
+              {status === 'paused' ? (
+                <Button onClick={onStart}>Start</Button>
+              ) : (
+                <Button variant='default' onClick={onPause}>
+                  Pause
+                </Button>
+              )}
+
+              <Button variant='destructive' onClick={onReset}>
+                Reset Simulation
+              </Button>
+            </div>
+          )}
+
           {timeElapse && (
             <>
-              <div className='flex items-center justify-center text-xl my-2'>
-                <div>{formatTime(timeElapse.hours)}:</div>
-                <div>{formatTime(timeElapse.minutes)}:</div>
-                <div>{formatTime(timeElapse.seconds)}</div>
-              </div>
-              <div className='flex mb-2 justify-center items-center gap-4'>
-                <RiSpeedFill />
-                <div className='flex-1'>
-                  <Slider
-                    defaultValue={[multiplier]}
-                    max={1000}
-                    min={1}
-                    onValueChange={onMultiplierChanged}
-                    step={1}
-                  />
-                </div>
-                <div className='text-sm font-bold'>
-                  {multiplier}
-                  <span className='text-xs'>x</span>
-                </div>
-              </div>
-
+              <OperationProgress elapse={timeElapse.distance} />
+              <Speedup />
               <div className='flex items-center justify-center text-sm'>
                 <div className='px-2'>Next bus at</div>
                 {nextBusDetailedTime ? (

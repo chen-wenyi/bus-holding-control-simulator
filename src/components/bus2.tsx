@@ -176,7 +176,7 @@ function Box() {
     }
   });
   return (
-    <mesh ref={meshRef} scale={15}>
+    <mesh ref={meshRef} scale={10}>
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color='yellow' />
     </mesh>

@@ -7,7 +7,6 @@ import { Suspense, useEffect } from 'react';
 import { Bus } from './bus2';
 import BusStops from './busstop';
 import { AnimatedCharacter } from './character';
-import { Legend } from './legend';
 import RouteLine from './route';
 import Scene from './scene';
 
@@ -51,7 +50,7 @@ export default function Simulator() {
 
   return (
     <>
-      <Legend />
+      {/* <Legend /> */}
       <Canvas
         camera={{ fov: 65, near: 1, far: 2000 }}
         style={{ width: '80vw', height: '100vh' }}

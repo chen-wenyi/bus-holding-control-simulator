@@ -10,7 +10,7 @@ export interface ProcessedPolicyOutputData {
   from: string;
   to: string;
   duration: number;
-  dwell: number
+  dwell: number;
   occupancy: [number, number];
 }
 
@@ -21,7 +21,7 @@ export interface TimeElapsed {
   hours: number;
   minutes: number;
   seconds: number;
-  distance: number; // milliseconds
+  distance: number; // second
 }
 
 export interface TimeLeft {
@@ -29,5 +29,7 @@ export interface TimeLeft {
   hours: number;
   minutes: number;
   seconds: number;
-  distance: number; // milliseconds
+  distance: number; // second
 }
+
+export type TimerStatus = 'idle' | 'paused' | 'started' | 'ended';
