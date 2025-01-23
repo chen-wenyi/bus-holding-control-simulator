@@ -17,6 +17,9 @@ export default function useTimer() {
   const [time, setTime] = useState(0);
 
   const animate = () => {
+    if (status === 'paused') {
+      return;
+    }
     const currentTime = performance.now();
     const elapsedTime = (currentTime - startTime.current) * multiplier;
     if (totalOperationTime && elapsedTime >= totalOperationTime * 1000) {

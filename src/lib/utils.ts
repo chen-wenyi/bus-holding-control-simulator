@@ -48,3 +48,84 @@ export function debounce<T extends (...args: unknown[]) => void>(
     }, wait);
   };
 }
+
+type CountdownCallbacks = {
+  onUpdate?: (timeLeft: number) => void;
+  onComplete?: () => void;
+};
+
+export function createCountdown(
+  duration: number, // in milliseconds
+  callbacks: CountdownCallbacks = {}
+) {
+  const onUpdate = callbacks.onUpdate || (() => {});
+  let onComplete = callbacks.onComplete || (() => {});
+
+  let startTime: number | null = null;
+  let pausedTime: number | null = null;
+  let remainingTime: number = duration;
+  let isPaused: boolean = false;
+
+  function update(timestamp: number): void {
+    if (startTime === null) startTime = timestamp;
+
+    if (isPaused) {
+      pausedTime = timestamp;
+      return; // Skip updating while paused
+    }
+
+    if (pausedTime !== null) {
+      startTime += timestamp - pausedTime; // Adjust for the paused duration
+      pausedTime = null;
+    }
+
+    const elapsed = timestamp - startTime;
+    const timeLeft = Math.max(remainingTime - elapsed, 0);
+
+    onUpdate(timeLeft);
+
+    if (timeLeft > 0) {
+      requestAnimationFrame(update);
+    } else {
+      onComplete();
+    }
+  }
+
+  function start(): void {
+    if (remainingTime > 0) {
+      isPaused = false;
+      requestAnimationFrame(update);
+    }
+  }
+
+  function pause(): void {
+    isPaused = true;
+  }
+
+  function resume(): void {
+    if (isPaused && remainingTime > 0) {
+      isPaused = false;
+      requestAnimationFrame(update);
+    }
+  }
+
+  function reset(newDuration?: number, newOnComplete?: () => void): void {
+    if (newDuration !== undefined) duration = newDuration;
+    remainingTime = duration;
+    startTime = null;
+    pausedTime = null;
+    isPaused = false;
+
+    // Update the onComplete callback if provided
+    if (newOnComplete) {
+      onComplete = newOnComplete;
+    }
+  }
+
+  return {
+    start,
+    pause,
+    resume,
+    reset,
+  };
+}

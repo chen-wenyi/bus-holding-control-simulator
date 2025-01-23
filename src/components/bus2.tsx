@@ -1,10 +1,11 @@
 'use client';
 
+import { createCountdown } from '@/lib/utils';
 import { useSimStore } from '@/store/useSimStore';
 import { ProcessedPolicyOutputData } from '@/types';
 import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LiaUserClockSolid } from 'react-icons/lia';
 import * as THREE from 'three';
 import { roadSectionCurves } from './stations2';
@@ -28,6 +29,7 @@ export function Bus({
 }) {
   const multiplier = useSimStore((store) => store.timer.multiplier);
   const removeOnRoadBus = useSimStore((store) => store.removeOnRoadBus);
+  const status = useSimStore((store) => store.timer.status);
   const busRef = useRef<THREE.Mesh>(null);
   const progress = useRef(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,6 +42,10 @@ export function Bus({
   const [occupancy, setOccupancy] = useState(
     getCurrentOccupancy(operationData[0].occupancy, passengerCapacity)
   );
+
+  const { start, pause, reset, resume } = useMemo(() => {
+    return createCountdown(9999 / multiplier);
+  }, []);
 
   useEffect(() => {
     console.log('busId:', id);
@@ -58,7 +64,15 @@ export function Bus({
   // }, []);
 
   useFrame((_, delta) => {
-    if (isFinished.current || isDwelling) return;
+    if (isFinished.current) return;
+
+    if (status === 'paused') {
+      pause();
+      return;
+    } else if (isDwelling) {
+      resume();
+      return;
+    }
 
     const curve = curves[currentIndex];
 
@@ -72,10 +86,22 @@ export function Bus({
 
     if (!hasDewelled.current && busRef.current) {
       setIsDwelling(true);
-      setTimeout(() => {
-        setIsDwelling(false);
+      // currentDewellDurationRemian.current = dwell / multiplier;
+      // setTimeout(() => {
+      //   setIsDwelling(false);
+      //   setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
+      // }, (dwell * 1000) / multiplier);
+      if (dwell !== 0) {
+        reset((dwell * 1000) / multiplier, () => {
+          setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
+          setIsDwelling(false);
+        });
+        start();
+      } else {
         setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
-      }, (dwell * 1000) / multiplier);
+        setIsDwelling(false);
+      }
+
       hasDewelled.current = true;
 
       const position = curve.getPointAt(0);
