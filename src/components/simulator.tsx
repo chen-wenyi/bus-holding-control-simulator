@@ -1,14 +1,18 @@
+
 'use client';
 
 import { useSimStore } from '@/store/useSimStore';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
-import { Suspense, useEffect } from 'react';
+import React, { useState, useRef, Suspense, useEffect } from 'react';
 import { Bus } from './bus2';
 import BusStops from './busstop';
-import { AnimatedCharacter } from './character';
+import Characters from './character';
 import RouteLine from './route';
 import Scene from './scene';
+import ViewControls from './viewControls';
+import { OrbitControls as ThreeOrbitControls } from 'three-stdlib';
+
 
 function MapModel({
   position,
@@ -17,7 +21,7 @@ function MapModel({
   position: [number, number, number];
   scale: [number, number, number];
 }) {
-  const { scene } = useGLTF('/assets/CITY_0112.glb');
+  const { scene } = useGLTF('/assets/CITY_final.glb');
   return scene ? (
     <primitive object={scene} position={position} scale={scale} />
   ) : null;
@@ -25,168 +29,86 @@ function MapModel({
 
 function AdjustCamera({
   mapPosition,
+  mode,
+  controlsRef,
 }: {
   mapPosition: [number, number, number];
+  mode: 'topView' | 'rotatedSouth' | 'rotatedNorth';
+  controlsRef: React.RefObject<ThreeOrbitControls | null>;
 }) {
   const { camera, size } = useThree();
 
   useEffect(() => {
-    camera.position.set(
-      mapPosition[0],
-      mapPosition[1] + 200,
-      mapPosition[2] + 200
-    );
-    camera.lookAt(mapPosition[0], mapPosition[1], mapPosition[2]);
-  }, [camera, mapPosition, size.height]);
+    const centerX = mapPosition[0];
+    const centerY = mapPosition[1];
+    const centerZ = mapPosition[2];
+
+    if (mode === 'topView') {
+      camera.position.set(centerX, centerY + 450, centerZ);
+      camera.lookAt(centerX, centerY, centerZ);
+    } else if (mode === 'rotatedSouth') {
+      camera.position.set(centerX, centerY + 380, centerZ + 300);
+      camera.lookAt(centerX, centerY, centerZ);
+    } else if (mode === 'rotatedNorth') {
+      camera.position.set(centerX, centerY + 380, centerZ - 300);
+      camera.lookAt(centerX, centerY, centerZ);
+    }
+
+    if (controlsRef.current) {
+      controlsRef.current.target.set(mapPosition[0], mapPosition[1], mapPosition[2]);
+      controlsRef.current.update();
+    }
+
+    camera.updateProjectionMatrix();
+
+  }, [camera, controlsRef, mapPosition, mode]);
 
   return null;
 }
 
-const mapPosition: [number, number, number] = [30, 160, 20];
+
+// const mapPosition: [number, number, number] = [30, 160, 20];
 
 export default function Simulator() {
   const busesOnRoad = useSimStore((state) => state.busOperation.busesOnRoad);
   const isDebug = useSimStore((state) => state.debuge);
+  const [viewMode, setViewMode] = useState<'topView' | 'rotatedSouth' | 'rotatedNorth'>('rotatedSouth');
+  const controlsRef = useRef<ThreeOrbitControls | null>(null);
+
+  const toggleRotatedView = () => {
+    setViewMode((prevMode) => (prevMode === 'rotatedSouth' ? 'rotatedNorth' : 'rotatedSouth'));
+  };
 
   return (
     <>
+      <ViewControls
+        onSetTopView={() => setViewMode('topView')}
+        onSetRotatedView={toggleRotatedView}
+      />
       {/* <Legend /> */}
       <Canvas
-        camera={{ fov: 65, near: 1, far: 2000 }}
-        style={{ width: '80vw', height: '100vh' }}
+        camera={{ position: [0, 250, 120], fov: 65, near: 1, far: 2000, type: 'PerspectiveCamera', }}
+        style={{ width: '80%', height: '100vh', top: 0 }}
       >
         <OrbitControls
+          ref={controlsRef}
           maxPolarAngle={Math.PI / 3}
           minDistance={30}
           maxDistance={700}
-          target={[30, 130, 150]}
+          enableDamping={false}
         />
         {/* <AdjustCamera mapPosition={[40, 120, 120]} /> */}
-        <AdjustCamera mapPosition={mapPosition} />
+        <AdjustCamera mapPosition={[0, 0, 0]} mode={viewMode} controlsRef={controlsRef} />
         <Suspense fallback={null}>
           <Scene />
           <BusStops />
-        </Suspense>
-        <Suspense fallback={null}>
-          {!isDebug && <MapModel position={[0, 0, 0]} scale={[4, 4, 4]} />}
-          {busesOnRoad.map((_, idx) => (
-            <Bus
-              id={busesOnRoad[idx].id}
-              key={busesOnRoad[idx].id}
-              operationData={busesOnRoad[idx].value}
-            />
+          <RouteLine visible={isDebug} />
+          {!isDebug && <MapModel position={[0, 20, -90]} scale={[4, 4, 4]} />}
+          {busesOnRoad.map((bus) => (
+            <Bus key={bus.id} id={bus.id} operationData={bus.value} />
           ))}
-          {!isDebug && (
-            <Suspense fallback={null}>
-              <AnimatedCharacter
-                modelPath='/assets/dadkid.glb'
-                position={[37, 31.5, 87]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/man.glb'
-                position={[-132, 32, 200]}
-                scale={5}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/couple.glb'
-                position={[28, 31.5, 145]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/2people.glb'
-                position={[-43, 31.5, 80]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/woman2.glb'
-                position={[195, 31.5, 200]}
-                scale={5.8}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/woman.glb'
-                position={[-83, 31.5, -26]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/kids.glb'
-                position={[-11, 31.5, 204]}
-                scale={0.05}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/lady.glb'
-                position={[-120, 31.5, -30]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/programmer.glb'
-                position={[132, 31.5, 168]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/older.glb'
-                position={[100, 31.5, 35]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/runner.glb'
-                position={[100, 31.5, -15]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/cafegirl.glb'
-                position={[172, 31.5, -34]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/2longhairgirl.glb'
-                position={[83, 31.4, 93]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/baseballman.glb'
-                position={[-193, 30.8, 155]}
-                scale={3.8}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/1longhair.glb'
-                position={[-68, 31.5, 204]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/backpacker.glb'
-                position={[238, 41.3, 200]}
-                scale={1.7}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/punk_girl.glb'
-                position={[148, 31.5, 205]}
-                scale={0.8}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/godette.glb'
-                position={[-197, 31.5, 194]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/guitarist.glb'
-                position={[15, 31.5, 200]}
-                scale={6}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/walkingphoneman.glb'
-                position={[-36, 31.5, 20]}
-                scale={0.2}
-              />
-              <AnimatedCharacter
-                modelPath='/assets/skater.glb'
-                position={[-77, 27.8, -29]}
-                scale={1}
-              />
-            </Suspense>
-          )}
+          {!isDebug && <Characters />}
         </Suspense>
-        <RouteLine visible={isDebug} />
       </Canvas>
     </>
   );
