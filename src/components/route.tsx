@@ -17,7 +17,7 @@ function DebugPoints({
       {visible &&
         points.map((point, index) => (
           <mesh key={index} position={point}>
-            <sphereGeometry args={[1, 16, 16]} />
+            <sphereGeometry args={[3, 18, 18]} />
             <meshBasicMaterial color={color} />
           </mesh>
         ))}
@@ -31,7 +31,7 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
       (station) =>
         new THREE.Vector3(
           station.position.x * SCALE_FACTOR,
-          station.position.y + 33,
+          station.position.y + 53,
           station.position.z * SCALE_FACTOR
         )
     ),
@@ -40,26 +40,38 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
   routeCurve.tension = 0.4;
 
   const points = routeCurve.getPoints(1000);
-  // console.log(stations.map(station => `${station.id}: ${station.position.x}, ${station.position.y}, ${station.position.z}`));
+
+  const stationPoints = stations
+    .filter((station) => station.type === 'Station')
+    .map(
+      (station) =>
+        new THREE.Vector3(
+          station.position.x * SCALE_FACTOR,
+          station.position.y + 53,
+          station.position.z * SCALE_FACTOR
+        )
+    );
+
+  const inflectionPoints = stations
+    .filter((station) => station.type === 'Inflection')
+    .map(
+      (station) =>
+        new THREE.Vector3(
+          station.position.x * SCALE_FACTOR,
+          station.position.y + 53,
+          station.position.z * SCALE_FACTOR
+        )
+    );
 
   return (
     <>
       {visible && (
         <>
-          <Line points={points} color='blue' lineWidth={5} dashed={false} />
-          <DebugPoints
-            points={stations.map(
-              (station) =>
-                new THREE.Vector3(
-                  station.position.x * SCALE_FACTOR,
-                  station.position.y + 33,
-                  station.position.z * SCALE_FACTOR
-                )
-            )}
-            color='red'
-            visible={visible}
-          />
-          <DebugPoints points={points} color='black' visible={visible} />
+          <Line points={points} color='grey' lineWidth={6} dashed={false} />
+          
+          <DebugPoints points={stationPoints} color='red' visible={visible} />
+          
+          <DebugPoints points={inflectionPoints} color='black' visible={false} />
         </>
       )}
     </>

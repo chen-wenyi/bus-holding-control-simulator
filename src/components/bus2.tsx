@@ -8,6 +8,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LiaUserClockSolid } from 'react-icons/lia';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { roadSectionCurves } from './stations2';
 
 const curves = roadSectionCurves;
@@ -30,7 +31,7 @@ export function Bus({
   const multiplier = useSimStore((store) => store.timer.multiplier);
   const removeOnRoadBus = useSimStore((store) => store.removeOnRoadBus);
   const status = useSimStore((store) => store.timer.status);
-  const busRef = useRef<THREE.Mesh>(null);
+  const busRef = useRef<THREE.Group>(null);
   const progress = useRef(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isFinished = useRef(false);
@@ -47,21 +48,22 @@ export function Bus({
     return createCountdown(9999 / multiplier);
   }, []);
 
+  // Load the GLTF model
+  const [gltf, setGltf] = useState<THREE.Group | null>(null);
+
   useEffect(() => {
-    console.log('busId:', id);
-    console.log(curves.length);
-    console.log(operationData.length);
-  }, [curves]);
-
-  // const [gltf, setGltf] = useState<GLTF | null>(null);
-
-  // useEffect(() => {
-  //   const dracoLoader = new DRACOLoader();
-  //   dracoLoader.setDecoderPath('/draco-gltf/');
-  //   const loader = new GLTFLoader();
-  //   loader.setDRACOLoader(dracoLoader);
-  //   loader.load('/assets/bus.glb', setGltf);
-  // }, []);
+    const loader = new GLTFLoader();
+    loader.load(
+      '/assets/green_bus.glb',
+      (loadedGltf) => {
+        setGltf(loadedGltf.scene);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading bus model:', error);
+      }
+    );
+  }, []);
 
   useFrame((_, delta) => {
     if (isFinished.current) return;
@@ -86,11 +88,6 @@ export function Bus({
 
     if (!hasDewelled.current && busRef.current) {
       setIsDwelling(true);
-      // currentDewellDurationRemian.current = dwell / multiplier;
-      // setTimeout(() => {
-      //   setIsDwelling(false);
-      //   setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
-      // }, (dwell * 1000) / multiplier);
       if (dwell !== 0) {
         reset((dwell * 1000) / multiplier, () => {
           setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
@@ -136,14 +133,16 @@ export function Bus({
 
   return (
     <>
-      <mesh ref={busRef}>
-        {/* <primitive
-          object={gltf.scene.clone()}
-          scale={[7.5, 7.5, 7.5]}
-          rotation={[0, Math.PI, 0]}
-          position={[3.5, 0, 4]}
-        /> */}
-        <Box />
+      <group ref={busRef}>
+        {gltf ? (
+          <primitive
+            object={gltf}
+            scale={[3, 3, 3]}
+            rotation={[0, 0, 0]}
+          />
+        ) : (
+          <Box />
+        )}
         <Html position={[0, 18, 0]} center>
           {isDwelling ? (
             <div
@@ -151,6 +150,28 @@ export function Bus({
                 backgroundColor: 'rgba(0, 0, 0, 1)',
                 color: 'white',
                 padding: '0',
+                borderRadius: '50%',
+                width: '35px',
+                height: '35px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '15px',
+                border: '2px solid white',
+                boxShadow: '0px 4px 8px rgba(0,0,0,0.3)',
+                textAlign: 'center',
+                transition: 'all 0.1s ease-in-out',
+              }}
+            >
+              <LiaUserClockSolid style={{ fontSize: '20px' }} />
+            </div>
+          ) : (
+            <div
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: 'white',
+                padding: '8px',
                 borderRadius: '50%',
                 width: '25px',
                 height: '25px',
@@ -162,49 +183,23 @@ export function Bus({
                 border: '1px solid white',
                 boxShadow: '0px 2px 5px rgba(0,0,0,0.3)',
                 textAlign: 'center',
-              }}
-            >
-              <LiaUserClockSolid style={{ fontSize: '15px' }} />
-            </div>
-          ) : (
-            <div
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                color: 'white',
-                padding: '8px',
-                borderRadius: '50%',
-                width: '20px',
-                height: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '12px',
-                border: '1px solid white',
-                boxShadow: '0px 2px 5px rgba(0,0,0,0.3)',
-                textAlign: 'center',
+                transition: 'all 0.1s ease-in-out',
               }}
             >
               {occupancy}
             </div>
           )}
         </Html>
-      </mesh>
+      </group>
     </>
   );
 }
 
 function Box() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  useFrame((_, delta) => {
-    if (meshRef && meshRef.current) {
-      meshRef.current.rotation.x += delta;
-    }
-  });
   return (
-    <mesh ref={meshRef} scale={10}>
+    <mesh scale={10}>
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color='yellow' />
+      <meshStandardMaterial color="yellow" />
     </mesh>
   );
 }
