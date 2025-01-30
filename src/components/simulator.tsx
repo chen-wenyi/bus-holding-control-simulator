@@ -95,10 +95,11 @@ export default function Simulator() {
           maxPolarAngle={Math.PI / 3}
           minDistance={30}
           maxDistance={700}
-          enableDamping={false}
+          enableDamping={true}
         />
         {/* <AdjustCamera mapPosition={[40, 120, 120]} /> */}
         <AdjustCamera mapPosition={[0, 0, 0]} mode={viewMode} controlsRef={controlsRef} />
+
         <Suspense fallback={null}>
           <Scene />
           <BusStops />

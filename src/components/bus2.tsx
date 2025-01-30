@@ -137,7 +137,7 @@ export function Bus({
         {gltf ? (
           <primitive
             object={gltf}
-            scale={[3, 3, 3]}
+            scale={[3.5, 3.5, 3.5]}
             rotation={[0, 0, 0]}
           />
         ) : (
@@ -151,15 +151,15 @@ export function Bus({
                 color: 'white',
                 padding: '0',
                 borderRadius: '50%',
-                width: '35px',
-                height: '35px',
+                width: '38px',
+                height: '38px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 'bold',
-                fontSize: '15px',
+                fontSize: '18px',
                 border: '2px solid white',
-                boxShadow: '0px 4px 8px rgba(0,0,0,0.3)',
+                boxShadow: '0px 6px 10px rgba(0,0,0,0.3)',
                 textAlign: 'center',
                 transition: 'all 0.1s ease-in-out',
               }}
@@ -173,15 +173,15 @@ export function Bus({
                 color: 'white',
                 padding: '8px',
                 borderRadius: '50%',
-                width: '25px',
-                height: '25px',
+                width: '30px',
+                height: '30px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 'bold',
-                fontSize: '12px',
+                fontSize: '15px',
                 border: '1px solid white',
-                boxShadow: '0px 2px 5px rgba(0,0,0,0.3)',
+                boxShadow: '0px 4px 8px rgba(0,0,0,0.3)',
                 textAlign: 'center',
                 transition: 'all 0.1s ease-in-out',
               }}

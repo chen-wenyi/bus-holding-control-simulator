@@ -28,7 +28,7 @@ function SingleBusStop({
 
   return (
     <group position={adjustedPosition.toArray()}>
-      <primitive object={clonedScene} scale={SCALE_FACTOR * 0.075} />
+      <primitive object={clonedScene} scale={SCALE_FACTOR * 0.1} />
     </group>
   );
 }
@@ -41,7 +41,7 @@ const BusStops = () => {
         .map((station) => ({
           position: new THREE.Vector3(
             station.position.x * SCALE_FACTOR,
-            station.position.y + 70,
+            station.position.y + 76,
             station.position.z * SCALE_FACTOR
           ),
           offset: station.offset,

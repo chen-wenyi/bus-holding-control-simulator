@@ -71,7 +71,7 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
           
           <DebugPoints points={stationPoints} color='red' visible={visible} />
           
-          <DebugPoints points={inflectionPoints} color='black' visible={false} />
+          <DebugPoints points={inflectionPoints} color='white' visible={false} />
         </>
       )}
     </>
