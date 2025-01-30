@@ -18,7 +18,7 @@ export default function ViewControls({
         alignItems: 'center',
         position: 'absolute',
         zIndex: 10,
-        top: '3%',
+        top: '5%',
         left: '58%',
         transform: 'translateX(-50%)',
         background: 'rgba(255, 255, 255, 0.8)',
