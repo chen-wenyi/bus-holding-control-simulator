@@ -31,13 +31,11 @@ export default function SelectOutput() {
   const state = useSimStore((state) => state);
 
   const [open, setOpen] = useState(false);
-
   const [outputs, setOutputs] = useState<ListBlobResultBlob[]>([]);
   const [optimisedOutputs, updateOptimisedOutputs] = useOptimistic(
     outputs,
     (state, url: string) => state.filter((o) => o.url !== url)
   );
-
   const [isPending, startPendingTransition] = useTransition();
 
   const displayedOutput = selectedOutput?.name || 'Select Model Output';
@@ -47,7 +45,7 @@ export default function SelectOutput() {
     if (open) {
       startPendingTransition(async () => {
         const { data } = await axios.get<ListBlobResultBlob[]>('/api/outputs');
-        startPendingTransition(() => setOutputs(data));
+        setOutputs(data);
       });
     }
   };
@@ -72,30 +70,30 @@ export default function SelectOutput() {
   };
 
   return (
-    <div className='flex flex-col justify-center items-center w-[85%]'>
+    <div className="flex flex-col justify-center items-center w-[85%]">
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger className='w-full'>
-          <Button className='w-full' variant='outline' asChild>
-            <div title={displayedOutput} className='truncate'>
+        <DialogTrigger className="w-full">
+          <Button className="w-full" variant="outline" asChild>
+            <div title={displayedOutput} className="truncate">
               {displayedOutput}
             </div>
           </Button>
         </DialogTrigger>
-        <DialogContent className='bg-white'>
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>Select Model Output</DialogTitle>
             <DialogDescription>Select an output to simulate</DialogDescription>
           </DialogHeader>
           <div>
             {isPending ? (
-              <LoaderCircle className='animate-spin duration-1000 ml-4' />
+              <LoaderCircle className="animate-spin duration-1000 ml-4" />
             ) : (
               optimisedOutputs
                 .filter((output) => output.pathname.includes('outputs'))
                 .map((o, idx) => (
-                  <div className='flex' key={o.pathname + idx}>
-                    <Button variant='ghost' onClick={() => onOutputClicked(o)}>
-                      <span className='text-xs'>
+                  <div className="flex" key={o.pathname + idx}>
+                    <Button variant="ghost" onClick={() => onOutputClicked(o)}>
+                      <span className="text-xs">
                         {o.pathname.replace('outputs/', '')}
                       </span>
                       <Delete onDelete={() => onOutputDelete(o.url)} />
@@ -107,17 +105,19 @@ export default function SelectOutput() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className='flex flex-col items-center justify-around w-full my-2'>
-        <div className='flex gap-2'>
-          <Bus onClick={() => console.log(state)} />
-          Buses:
-          <div>{selectedOutput?.busNum || '-'}</div>
+
+      <div className="flex flex-col w-full my-2 space-y-2 pl-3">
+      {[
+        { icon: <Bus className="w-6 h-6 text-[#334155]" />, label: "Services:", value: selectedOutput?.busNum || "-" },
+        { icon: <Waypoints className="w-6 h-6 text-[#334155]" />, label: "Stops:", value: selectedOutput?.stopNum || "-" },
+      ].map(({ icon, label, value }, index) => (
+        <div key={index} className="flex items-center w-full h-6">
+          <div className="w-[22%] flex justify-center">{icon}</div>
+          <div className="w-[25%] text-left text-[14px]">{label}</div>
+          <div className="w-[28%] text-right">{value}</div>
         </div>
-        <div className='flex gap-2'>
-          <Waypoints />
-          Stops:
-          <div>{selectedOutput?.stopNum || '-'}</div>
-        </div>
+      ))}
+
         <PassengerConfig />
       </div>
     </div>
@@ -130,6 +130,7 @@ const Delete = ({ onDelete }: { onDelete: () => void }) => {
     e.stopPropagation();
     onDelete();
   };
+
   return (
     <div
       onMouseOver={() => setOnDeleteHover(true)}

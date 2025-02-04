@@ -22,8 +22,8 @@ export default function ViewControls({
         left: '58%',
         transform: 'translateX(-50%)',
         background: 'rgba(255, 255, 255, 0.8)',
-        padding: '9px',
-        borderRadius: '100px',
+        padding: '8px',
+        borderRadius: '8px',
         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
       }}
     >
@@ -36,7 +36,7 @@ export default function ViewControls({
           justifyContent: 'center',
           margin: '0 5px',
           padding: '6px',
-          borderRadius: '100px',
+          borderRadius: '8px',
           border: 'none',
           cursor: 'pointer',
           background: 'rgb(73, 104, 118)',
@@ -88,7 +88,7 @@ export default function ViewControls({
           justifyContent: 'center',
           margin: '0 5px',
           padding: '6px',
-          borderRadius: '100px',
+          borderRadius: '8px',
           border: 'none',
           cursor: 'pointer',
           background: 'rgb(73, 104, 118)',

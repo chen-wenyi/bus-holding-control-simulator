@@ -67,9 +67,9 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
     <>
       {visible && (
         <>
-          <Line points={points} color='grey' lineWidth={6} dashed={false} />
+          <Line points={points} color='white' lineWidth={6} dashed={false} />
           
-          <DebugPoints points={stationPoints} color='red' visible={visible} />
+          <DebugPoints points={stationPoints} color='grey' visible={visible} />
           
           <DebugPoints points={inflectionPoints} color='white' visible={false} />
         </>

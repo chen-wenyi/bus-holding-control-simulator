@@ -9,14 +9,14 @@ import Speedup from './speedup';
 import { Button } from './ui/button';
 
 export default function TimePanel() {
-  const busTimeTable = useSimStore(
-    (state) => state.selectedOutput?.busTimeTable
-  );
+  const busTimeTable = useSimStore((state) => state.selectedOutput?.busTimeTable);
+  const earliestTime = busTimeTable ? Math.min(...busTimeTable) : 21600; // 06:00:00
   const startSimulation = useSimStore((state) => state.startSimulation);
   const resetSimulation = useSimStore((state) => state.resetSimulation);
   const pauseSimulation = useSimStore((state) => state.pauseSimulation);
   const timer = useSimStore((state) => state.timer);
   const { nextBusIndex, status } = timer;
+  const timeElapse = useTimer();
   const updateNextBusIndex = useSimStore((state) => state.updateNextBusIndex);
   const operationBuses = useSimStore((state) => state.busOperation.busesOnRoad);
   const dispatchedBuses = useSimStore(
@@ -24,14 +24,15 @@ export default function TimePanel() {
   );
 
   const nextBusTime =
-    nextBusIndex !== -1 ? busTimeTable?.[nextBusIndex] : undefined;
+  nextBusIndex !== -1 && busTimeTable && nextBusIndex < busTimeTable.length
+    ? earliestTime + busTimeTable[nextBusIndex]
+    : earliestTime;
 
   const nextBusDetailedTime = nextBusTime
     ? getDetailedTime(nextBusTime)
     : undefined;
 
   const outputName = useSimStore((state) => state.selectedOutput?.name);
-  const timeElapse = useTimer();
 
   const onStart = () => {
     startSimulation();
@@ -58,11 +59,19 @@ export default function TimePanel() {
   }, [nextBusIndex, nextBusTime, timeElapse, updateNextBusIndex]);
 
   return (
-    <div className='flex flex-col p-4 w-full'>
+    <div className="flex flex-col p-4 w-full " >
       {outputName && (
         <>
           {status === 'idle' ? (
-            <Button onClick={onStart}>Start Simulation</Button>
+            <Button
+            className={`w-full text-white ${
+              status === 'idle'
+                ? 'bg-[#1B2C3F] hover:bg-[#2A3D54]'
+                : ''
+            }`}
+            onClick={onStart}
+          >
+            Start Simulation</Button>
           ) : (
             <div className='flex items-center justify-center gap-4'>
               <Button variant='destructive' onClick={onReset}>

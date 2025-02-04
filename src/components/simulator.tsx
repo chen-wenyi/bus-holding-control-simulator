@@ -21,7 +21,7 @@ function MapModel({
   position: [number, number, number];
   scale: [number, number, number];
 }) {
-  const { scene } = useGLTF('/assets/CITY_final.glb');
+  const { scene } = useGLTF('/assets/CITY.glb');
   return scene ? (
     <primitive object={scene} position={position} scale={scale} />
   ) : null;
