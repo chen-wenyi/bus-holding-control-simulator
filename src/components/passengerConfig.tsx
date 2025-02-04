@@ -1,7 +1,7 @@
 'use client';
 
 import { useSimStore } from '@/store/useSimStore';
-import { MdOutlineEmojiPeople } from 'react-icons/md';
+import { Users } from 'lucide-react';
 import { Input } from './ui/input';
 
 const PassengerConfig = () => {
@@ -18,18 +18,16 @@ const PassengerConfig = () => {
   };
 
   return (
-    <div className='flex justify-center items-center pl-12'>
-      <div className='flex flex-1'>
-        <MdOutlineEmojiPeople size={22} />
-        <div>Capacity</div>
+    <div className="flex items-center w-full pl-3 h-6 text-[#334155]">
+      <div className="w-[17%] flex justify-left">
+        <Users className="w-6 h-6" />
       </div>
-      <div className='flex w-14 mx-2'>
-        <Input
-          value={value}
-          onChange={({ target }) => onChange(target.value)}
-        />
+      <div className="w-[30%] text-left text-[14px]">Capacity:</div>
+      <div className="w-[48%] text-right ml-auto">
+        <Input className="w-16 px-2 py-1 text-center border rounded" value={value} onChange={({ target }) => onChange(target.value)} />
       </div>
     </div>
+
   );
 };
 

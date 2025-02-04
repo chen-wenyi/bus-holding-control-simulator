@@ -9,47 +9,50 @@ const Speedup = () => {
   const { multiplier, status } = useSimStore((state) => state.timer);
 
   const onMultiplierChanged = useCallback(
-    debounce((value: number) => {
+    (value: number) => {
       setTimerMultiplier(value);
-    }, 200),
+    },
     [setTimerMultiplier]
   );
 
   return (
-    <div className='flex my-4 justify-center items-center gap-2'>
-      <Button
-        size='sm'
-        variant={multiplier === 1 ? 'default' : 'outline'}
-        onClick={() => onMultiplierChanged(1)}
-        disabled={status !== 'idle'}
-      >
-        x 1
-      </Button>
-      <Button
-        size='sm'
-        variant={multiplier === 10 ? 'default' : 'outline'}
-        onClick={() => onMultiplierChanged(10)}
-        disabled={status !== 'idle'}
-      >
-        x 10
-      </Button>
-      <Button
-        size='sm'
-        variant={multiplier === 50 ? 'default' : 'outline'}
-        onClick={() => onMultiplierChanged(50)}
-        disabled={status !== 'idle'}
-      >
-        x 50
-      </Button>
-      <Button
-        size='sm'
-        variant={multiplier === 100 ? 'default' : 'outline'}
-        onClick={() => onMultiplierChanged(100)}
-        disabled={status !== 'idle'}
-      >
-        x 100
-      </Button>
+
+    <div className='flex my-4 justify-center items-center gap-3.5'>
+      {[1, 10, 50, 100].map((value) => (
+        <Button
+          key={value}
+          size='sm'
+          className={`h-10 w-10 rounded-full flex items-center justify-center ${
+            multiplier === value
+              ? 'bg-[#2A3D54] text-white hover:bg-[#1B2C3F]'
+              : 'bg-white text-[#2A3D54] border border-[#2A3D54] hover:bg-[#2A3D54] hover:text-white'
+          } ${status !== 'idle' ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={() => onMultiplierChanged(value)}
+          disabled={status !== 'idle'}
+        >
+          x {value}
+        </Button>
+      ))}
     </div>
+
+    // <div className='flex my-4 justify-center items-center gap-2' style={{borderRadius: '100px'}}>
+    //   {[1, 10, 50, 100].map((value) => (
+    //     <Button
+    //       key={value}
+    //       size='sm'
+    //       className={`w-16 transition-all duration-200 ${
+    //         multiplier === value
+    //           ? 'bg-[#2A3D54] text-white hover:bg-[#1B2C3F]'
+    //           : 'bg-white text-[#2A3D54] border border-[#2A3D54] hover:bg-[#2A3D54] hover:text-white'
+    //       } ${status !== 'idle' ? 'opacity-50 cursor-not-allowed' : ''}`}
+    //       onClick={() => onMultiplierChanged(value)}
+    //       disabled={status !== 'idle'}
+    //     >
+    //       x {value}
+    //     </Button>
+    //   ))}
+    // </div>
+
   );
 };
 

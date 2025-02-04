@@ -77,7 +77,7 @@ export const stations: bus_stations[] = [
   },
   {
     id: 'Station7',
-    position: new THREE.Vector3(24.5, -0.56525, 12),
+    position: new THREE.Vector3(24.4, -0.56525, 12),
     type: 'Station',
     offset: new THREE.Vector3(-6.5, 0, -5),
   },
@@ -185,13 +185,13 @@ export const stations: bus_stations[] = [
   },
   {
     id: 'Station16',
-    position: new THREE.Vector3(24.5, -0.56525, -7.7),
+    position: new THREE.Vector3(24.4, -0.56525, -7.7),
     type: 'Station',
     offset: new THREE.Vector3(-6.5, 0, -10),
   },
   {
     id: 'Station17',
-    position: new THREE.Vector3(24.5, -0.56525, -11),
+    position: new THREE.Vector3(24.4, -0.56525, -11),
     type: 'Station',
     offset: new THREE.Vector3(-6.5, 0, -10),
   },
@@ -619,7 +619,7 @@ export const sections: bus_stations[][] = [
     },
     {
       id: 'Station7',
-      position: new THREE.Vector3(24.5, -0.56525, 12),
+      position: new THREE.Vector3(24.4, -0.56525, 12),
       type: 'Station',
       offset: new THREE.Vector3(-6.5, 0, -5),
     },
@@ -627,7 +627,7 @@ export const sections: bus_stations[][] = [
   [
     {
       id: 'Station7',
-      position: new THREE.Vector3(24.5, -0.56525, 12),
+      position: new THREE.Vector3(24.4, -0.56525, 12),
       type: 'Station',
       offset: new THREE.Vector3(-6.5, 0, -5),
     },
@@ -799,7 +799,7 @@ export const sections: bus_stations[][] = [
     },
     {
       id: 'Station16',
-      position: new THREE.Vector3(24.5, -0.56525, -7.7),
+      position: new THREE.Vector3(24.4, -0.56525, -7.7),
       type: 'Station',
       offset: new THREE.Vector3(-6.5, 0, -10),
     },
@@ -807,13 +807,13 @@ export const sections: bus_stations[][] = [
   [
     {
       id: 'Station16',
-      position: new THREE.Vector3(24.5, -0.56525, -7.7),
+      position: new THREE.Vector3(24.4, -0.56525, -7.7),
       type: 'Station',
       offset: new THREE.Vector3(-6.5, 0, -10),
     },
     {
       id: 'Station17',
-      position: new THREE.Vector3(24.5, -0.56525, -11),
+      position: new THREE.Vector3(24.4, -0.56525, -11),
       type: 'Station',
       offset: new THREE.Vector3(-6.5, 0, -10),
     },
@@ -821,7 +821,7 @@ export const sections: bus_stations[][] = [
   [
     {
       id: 'Station17',
-      position: new THREE.Vector3(24.5, -0.56525, -11),
+      position: new THREE.Vector3(24.4, -0.56525, -11),
       type: 'Station',
       offset: new THREE.Vector3(-6.5, 0, -10),
     },

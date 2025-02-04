@@ -8,8 +8,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent className='flex items-center'>
-        <div className='text-base font-semibold text-center p-4'>
-          Bus Holding Control Simulator
+      <div className="text-lg font-bold text-[#1E293B] tracking-wide text-center py-3">
+      Bus Holding Control Simulator
         </div>
         <DebugButton />
         <Upload />
