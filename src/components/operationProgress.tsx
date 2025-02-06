@@ -5,10 +5,10 @@ import { Slider } from './ui/slider';
 
 const OperationProgress = ({ elapse }: { elapse: number }) => {
   const totalOperationTime = useSimStore((state) => state.selectedOutput?.totalOperationTime);
-  const busTimeTable = useSimStore((state) => state.selectedOutput?.busTimeTable);
-  const earliestTime = busTimeTable && busTimeTable.length > 0 ? Math.min(...busTimeTable) : 21600;
+  const { offset } = useSimStore((state) => state.busOperation);
 
-  const currentTime = earliestTime + elapse;
+  const currentTime = elapse;
+
   const timeElapse = getDetailedTime(currentTime);
 
   return (
@@ -26,9 +26,9 @@ const OperationProgress = ({ elapse }: { elapse: number }) => {
         </div>
       </div>
       <Slider
-        defaultValue={[earliestTime]}
-        max={totalOperationTime ? earliestTime + totalOperationTime : earliestTime + 3600}
-        min={earliestTime}
+        defaultValue={[offset]}
+        max={totalOperationTime ? offset + totalOperationTime : offset + 3600}
+        min={offset}
         value={[currentTime]}
         step={1}
       />

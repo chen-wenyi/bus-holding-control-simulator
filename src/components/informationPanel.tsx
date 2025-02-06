@@ -2,7 +2,7 @@ import TimePanel from './timePanel';
 
 export default function InformationPanel() {
   return (
-    <div className='border-t-2 w-full'>
+    <div className=" border-gray-400 w-full border-t-[0.5px]">
       <TimePanel />
     </div>
   );
