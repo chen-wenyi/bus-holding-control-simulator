@@ -147,7 +147,7 @@ export function Bus({
           {isDwelling ? (
             <div
               style={{
-                backgroundColor: 'rgba(0, 0, 0, 1)',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
                 color: 'white',
                 padding: '0',
                 borderRadius: '50%',
@@ -173,8 +173,8 @@ export function Bus({
                 color: 'white',
                 padding: '8px',
                 borderRadius: '50%',
-                width: '30px',
-                height: '30px',
+                width: '33px',
+                height: '33px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

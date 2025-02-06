@@ -3,6 +3,7 @@ import DebugButton from './debugButton';
 import InformationPanel from './informationPanel';
 import SelectOutput from './selectOutput';
 import Upload from './upload';
+import BusStatistics from './BusStatistics';
 
 export function AppSidebar() {
   return (

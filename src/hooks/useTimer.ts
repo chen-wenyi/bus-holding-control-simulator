@@ -4,41 +4,30 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function useTimer() {
   const timer = useSimStore((state) => state.timer);
-  const { breakpoint } = useSimStore((state) => state.busOperation);
+  const { breakpoint, offset } = useSimStore((state) => state.busOperation);
   const setTimerStatus = useSimStore((state) => state.setTimerStatus);
   const setOperationTime = useSimStore((state) => state.setOperationTime);
   const { multiplier, status } = timer;
   const totalOperationTime = useSimStore((state) => state.selectedOutput?.totalOperationTime);
-  const busTimeTable = useSimStore((state) => state.selectedOutput?.busTimeTable);
-
-  const earliestTime = busTimeTable && busTimeTable.length > 0 ? Math.min(...busTimeTable) : 21600;
-
   const requestRef = useRef<number>(null);
   const startTime = useRef(-1);
-  const elapsedTimeBeforePause = useRef(0);
-
-  const [time, setTime] = useState(() => earliestTime);
-
+  const [time, setTime] = useState(offset);
 
   useEffect(() => {
-    if (busTimeTable && busTimeTable.length > 0) {
-      setTime(earliestTime);
-      elapsedTimeBeforePause.current = 0;
-    }
-  }, [busTimeTable]);
+    setTime(offset);
+  }, []);
 
   const animate = () => {
     if (status === 'paused') return;
-
+    
     const currentTime = performance.now();
     const elapsedTime = (currentTime - startTime.current) * multiplier;
 
-    if (totalOperationTime && elapsedTime + elapsedTimeBeforePause.current >= totalOperationTime * 1000) {
+    if (totalOperationTime && elapsedTime / 1000 >= totalOperationTime) {
       setTimerStatus('ended');
     } else {
-      const newTime = earliestTime + elapsedTimeBeforePause.current + elapsedTime / 1000;
-      setTime(newTime);
-      setOperationTime(newTime);
+      setTime(offset + breakpoint + elapsedTime / 1000);
+      setOperationTime(breakpoint + elapsedTime / 1000);
       requestRef.current = requestAnimationFrame(animate);
     }
   };
@@ -48,12 +37,9 @@ export default function useTimer() {
       startTime.current = performance.now();
       requestRef.current = requestAnimationFrame(animate);
     } else if (status === 'idle') {
-      setTime(earliestTime);
-      elapsedTimeBeforePause.current = 0;
-    } else if (status === 'ended') {
-      if (totalOperationTime) setTime(earliestTime + totalOperationTime);
+      setTime(offset);
     } else if (status === 'paused') {
-      elapsedTimeBeforePause.current = time - earliestTime;
+      setTime(offset + breakpoint);
     }
 
     return () => {
@@ -62,11 +48,10 @@ export default function useTimer() {
   }, [status, totalOperationTime]);
 
   const { hours, minutes, seconds } = getDetailedTime(time);
-
   return {
     hours,
     minutes,
     seconds,
-    distance: time - earliestTime,
+    distance: time,
   };
 }

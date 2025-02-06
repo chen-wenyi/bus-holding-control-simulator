@@ -108,8 +108,8 @@ export default function SelectOutput() {
 
       <div className="flex flex-col w-full my-2 space-y-2 pl-3">
       {[
-        { icon: <Bus className="w-6 h-6 text-[#334155]" />, label: "Services:", value: selectedOutput?.busNum || "-" },
-        { icon: <Waypoints className="w-6 h-6 text-[#334155]" />, label: "Stops:", value: selectedOutput?.stopNum || "-" },
+        { icon: <Bus className="w-6 h-6 text-[#334155]" />, label: "Services:", value: selectedOutput?.busNum || "0" },
+        { icon: <Waypoints className="w-6 h-6 text-[#334155]" />, label: "Trips:", value: selectedOutput?.stopNum || "0" },
       ].map(({ icon, label, value }, index) => (
         <div key={index} className="flex items-center w-full h-6">
           <div className="w-[22%] flex justify-center">{icon}</div>

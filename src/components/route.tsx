@@ -17,7 +17,7 @@ function DebugPoints({
       {visible &&
         points.map((point, index) => (
           <mesh key={index} position={point}>
-            <sphereGeometry args={[3, 18, 18]} />
+            <sphereGeometry args={[4, 18, 18]} />
             <meshBasicMaterial color={color} />
           </mesh>
         ))}
@@ -67,7 +67,7 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
     <>
       {visible && (
         <>
-          <Line points={points} color='white' lineWidth={6} dashed={false} />
+          <Line points={points} color='white' lineWidth={7} dashed={false} />
           
           <DebugPoints points={stationPoints} color='grey' visible={visible} />
           

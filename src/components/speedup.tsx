@@ -3,6 +3,7 @@ import { useSimStore } from '@/store/useSimStore';
 import { debounce } from 'lodash';
 import { useCallback } from 'react';
 import { Button } from './ui/button';
+import { FastForward } from 'lucide-react';
 
 const Speedup = () => {
   const setTimerMultiplier = useSimStore((state) => state.setTimerMultiplier);
@@ -17,12 +18,12 @@ const Speedup = () => {
 
   return (
 
-    <div className='flex my-4 justify-center items-center gap-3.5'>
+    <div className='flex my-3 justify-center items-center gap-1.5'>
       {[1, 10, 50, 100].map((value) => (
         <Button
           key={value}
           size='sm'
-          className={`h-10 w-10 rounded-full flex items-center justify-center ${
+          className={`h-11 w-11 rounded-full flex items-center justify-center ${
             multiplier === value
               ? 'bg-[#2A3D54] text-white hover:bg-[#1B2C3F]'
               : 'bg-white text-[#2A3D54] border border-[#2A3D54] hover:bg-[#2A3D54] hover:text-white'
@@ -30,7 +31,7 @@ const Speedup = () => {
           onClick={() => onMultiplierChanged(value)}
           disabled={status !== 'idle'}
         >
-          x {value}
+          {value}x
         </Button>
       ))}
     </div>
