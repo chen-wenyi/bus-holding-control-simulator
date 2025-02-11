@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { LiaUserClockSolid } from 'react-icons/lia';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { roadSectionCurves } from './stations2';
+import { roadSectionCurves } from './stations';
 
 const curves = roadSectionCurves;
 
@@ -199,7 +199,7 @@ function Box() {
   return (
     <mesh scale={10}>
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="yellow" />
+      <meshStandardMaterial color='yellow' />
     </mesh>
   );
 }

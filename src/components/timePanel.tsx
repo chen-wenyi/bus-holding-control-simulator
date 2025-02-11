@@ -4,33 +4,35 @@ import useTimer from '@/hooks/useTimer';
 import { formatTime, getDetailedTime } from '@/lib/utils';
 import { useSimStore } from '@/store/useSimStore';
 import { useEffect } from 'react';
-import OperationProgress from "./operationProgress";
-import BusStatistics from "./BusStatistics"; 
+import OperationProgress from './operationProgress';
 import Speedup from './speedup';
 import { Button } from './ui/button';
 
 export default function TimePanel() {
-  const busTimeTable = useSimStore((state) => state.selectedOutput?.busTimeTable);
-  const offset = useSimStore((state) => state.busOperation.offset);
-  const earliestTime = busTimeTable ? Math.min(...busTimeTable) : offset;
+  const busTimeTable = useSimStore(
+    (state) => state.selectedOutput?.busTimeTable
+  );
   const startSimulation = useSimStore((state) => state.startSimulation);
   const resetSimulation = useSimStore((state) => state.resetSimulation);
   const pauseSimulation = useSimStore((state) => state.pauseSimulation);
   const timer = useSimStore((state) => state.timer);
   const { nextBusIndex, status } = timer;
-  const timeElapse = useTimer();
   const updateNextBusIndex = useSimStore((state) => state.updateNextBusIndex);
   const operationBuses = useSimStore((state) => state.busOperation.busesOnRoad);
-  const dispatchedBuses = useSimStore((state) => state.busOperation.dispatchedBuses);
+  const offset = useSimStore((state) => state.busOperation.offset);
+  const dispatchedBuses = useSimStore(
+    (state) => state.busOperation.dispatchedBuses
+  );
 
   const nextBusTime =
-    nextBusIndex !== -1 && busTimeTable?.[nextBusIndex] !== undefined
-      ? offset + busTimeTable[nextBusIndex]
-      : offset;
+    nextBusIndex !== -1 ? busTimeTable?.[nextBusIndex] : undefined;
 
-  const nextBusDetailedTime = getDetailedTime(nextBusTime);
+  const nextBusDetailedTime = nextBusTime
+    ? getDetailedTime(nextBusTime)
+    : undefined;
 
   const outputName = useSimStore((state) => state.selectedOutput?.name);
+  const timeElapse = useTimer();
 
   const onStart = () => {
     startSimulation();
@@ -46,31 +48,24 @@ export default function TimePanel() {
 
   useEffect(() => {
     if (
-      status === 'started' &&
+      status !== 'paused' &&
       nextBusIndex !== -1 &&
       nextBusTime &&
       timeElapse &&
-      nextBusTime <= timeElapse.distance
+      nextBusTime < timeElapse.distance
     ) {
       updateNextBusIndex();
     }
-  }, [status, nextBusIndex, nextBusTime, timeElapse.distance]); 
+  }, [nextBusIndex, nextBusTime, timeElapse, updateNextBusIndex]);
 
   return (
-    <div className="flex flex-col p-3 w-full px-4">
+    <div className='flex flex-col p-4 w-full'>
       {outputName && (
         <>
           {status === 'idle' ? (
-            <Button
-              className={`w-full text-white ${
-                status === 'idle' ? 'bg-[#1B2C3F] hover:bg-[#2A3D54]' : ''
-              }`}
-              onClick={onStart}
-            >
-              Start Simulation
-            </Button>
+            <Button onClick={onStart}>Start Simulation</Button>
           ) : (
-            <div className='flex items-center justify-center gap-2'>
+            <div className='flex items-center justify-center gap-4'>
               <Button variant='destructive' onClick={onReset}>
                 Reset Simulation
               </Button>
@@ -84,37 +79,33 @@ export default function TimePanel() {
             </div>
           )}
 
-      {timeElapse && (
-        <>
-          <OperationProgress elapse={timeElapse.distance} />
-          <Speedup />
+          {timeElapse && (
+            <>
+              <OperationProgress elapse={timeElapse.distance} />
+              <Speedup />
+              <div className='flex items-center justify-center text-sm'>
+                <div className='px-2'>Next bus at</div>
+                {nextBusDetailedTime ? (
+                  <>
+                    <div>
+                      {formatTime(nextBusDetailedTime.hours + offset / 3600)}:
+                    </div>
+                    <div>{formatTime(nextBusDetailedTime.minutes)}:</div>
+                    <div>{formatTime(nextBusDetailedTime.seconds)}</div>
+                  </>
+                ) : (
+                  <>-</>
+                )}
+              </div>
 
-          <div className="grid grid-cols-2 gap-1 text-sm">
-            <div className="whitespace-nowrap">Next bus at:</div>
-            <div className="text-center">
-              {nextBusDetailedTime ? (
-                <>
-                  {formatTime(nextBusDetailedTime.hours)}:
-                  {formatTime(nextBusDetailedTime.minutes)}:
-                  {formatTime(nextBusDetailedTime.seconds)}
-                </>
-              ) : (
-                <>-</>
-              )}
-            </div>
-
-            <div className="whitespace-nowrap">Dispatched Buses:</div>
-            <div className="text-center">{dispatchedBuses.length}</div>
-
-            <div className="whitespace-nowrap pb-3">Buses on road:</div>
-            <div className="text-center pb-3">{operationBuses.length}</div>
-          </div>
-        </>
-      )}
-
-        <div className="border-t border-gray-400 w-full pt-4">
-          <BusStatistics />
-        </div>
+              <div className='flex items-center justify-center text-sm'>
+                Dispatched Buses: {dispatchedBuses.length}
+              </div>
+              <div className='flex items-center justify-center text-sm'>
+                Buses on road: {operationBuses.length}
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

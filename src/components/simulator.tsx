@@ -18,7 +18,6 @@ export default function Simulator() {
   const busesOnRoad = useSimStore((state) => state.busOperation.busesOnRoad);
   const isDebug = useSimStore((state) => state.debuge);
   const controlsRef = useRef<ThreeOrbitControls | null>(null);
-  const setView = useSimStore((state) => state.setView);
 
   return (
     <>

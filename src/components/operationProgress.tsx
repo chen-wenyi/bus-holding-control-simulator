@@ -21,17 +21,17 @@ const OperationProgress = ({ elapse }: { elapse: number }) => {
             <Clock className='mx-2' />
           </div>
           <div className='flex items-center justify-center text-xl font-semibold'>
-            <span>{formatTime(timeElapse.hours)}:</span>
+            <span>{formatTime(timeElapse.hours + offset / 3600)}:</span>
             <span>{formatTime(timeElapse.minutes)}:</span>
             <span>{formatTime(timeElapse.seconds)}</span>
           </div>
         </div>
       </div>
       <Slider
-        defaultValue={[offset]}
-        max={totalOperationTime ? offset + totalOperationTime : offset + 3600}
-        min={offset}
-        value={[currentTime]}
+        defaultValue={[0]}
+        max={totalOperationTime}
+        min={0}
+        value={[elapse]}
         step={1}
       />
     </div>
