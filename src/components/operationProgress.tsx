@@ -4,7 +4,9 @@ import { Clock } from 'lucide-react';
 import { Slider } from './ui/slider';
 
 const OperationProgress = ({ elapse }: { elapse: number }) => {
-  const totalOperationTime = useSimStore((state) => state.selectedOutput?.totalOperationTime);
+  const totalOperationTime = useSimStore(
+    (state) => state.selectedOutput?.totalOperationTime
+  );
   const { offset } = useSimStore((state) => state.busOperation);
 
   const currentTime = elapse;
@@ -18,7 +20,7 @@ const OperationProgress = ({ elapse }: { elapse: number }) => {
           <div className='w-[20%]'>
             <Clock className='mx-2' />
           </div>
-          <div className="flex items-center justify-center text-xl font-semibold">
+          <div className='flex items-center justify-center text-xl font-semibold'>
             <span>{formatTime(timeElapse.hours)}:</span>
             <span>{formatTime(timeElapse.minutes)}:</span>
             <span>{formatTime(timeElapse.seconds)}</span>

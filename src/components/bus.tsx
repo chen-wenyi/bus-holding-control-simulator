@@ -1,120 +1,205 @@
 'use client';
-import { Html } from '@react-three/drei';
-import { useFrame, useLoader } from '@react-three/fiber';
-import { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { CatmullRomCurve3 } from 'three';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 
+import { createCountdown } from '@/lib/utils';
+import { useSimStore } from '@/store/useSimStore';
+import { ProcessedPolicyOutputData } from '@/types';
+import { Html } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { LiaUserClockSolid } from 'react-icons/lia';
+import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { roadSectionCurves } from './stations2';
+
+const curves = roadSectionCurves;
+
+const getCurrentOccupancy = (
+  occupancy: ProcessedPolicyOutputData['occupancy'],
+  passengerCapacity: number
+) => {
+  const rate = occupancy[1];
+  return Math.floor(rate * passengerCapacity);
+};
 
 export function Bus({
-  curve,
-  stations,
-  passengerData,
-  delay = 0,
-  onFinish,
+  id,
+  operationData,
 }: {
-  curve: CatmullRomCurve3;
-  stations: THREE.Vector3[];
-  delay?: number;
-  passengerData: number[];
-  onFinish?: () => void;
+  id: number;
+  operationData: ProcessedPolicyOutputData[];
 }) {
-  const busRef = useRef<THREE.Mesh>(null!);
-  const [progress, setProgress] = useState(delay);
-  const [isStopped, setIsStopped] = useState(false);
-  const [currentStopIndex, setCurrentStopIndex] = useState(0);
-  const [currentPassengers, setCurrentPassengers] = useState(passengerData[0]);
-  const [isFinished, setIsFinished] = useState(false);
+  const multiplier = useSimStore((store) => store.timer.multiplier);
+  const removeOnRoadBus = useSimStore((store) => store.removeOnRoadBus);
+  const status = useSimStore((store) => store.timer.status);
+  const busRef = useRef<THREE.Group>(null);
+  const progress = useRef(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const isFinished = useRef(false);
+  const [isDwelling, setIsDwelling] = useState(false);
+  const hasDewelled = useRef(false);
+  const passengerCapacity = useSimStore(
+    (store) => store.busOperation.passengerCapacity
+  );
+  const [occupancy, setOccupancy] = useState(
+    getCurrentOccupancy(operationData[0].occupancy, passengerCapacity)
+  );
 
-  const duration = 60;
-  const stopThreshold = 2.0;
+  const { start, pause, reset, resume } = useMemo(() => {
+    return createCountdown(9999 / multiplier);
+  }, []);
 
-  const gltf = useLoader(GLTFLoader, '/assets/bus.glb', (loader) => {
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('/draco-gltf/');
-    (loader as GLTFLoader).setDRACOLoader(dracoLoader);
-  });
+  // Load the GLTF model
+  const [gltf, setGltf] = useState<THREE.Group | null>(null);
 
   useEffect(() => {
-    setProgress(0);
-    setCurrentStopIndex(0);
-    setIsStopped(false);
-  }, [duration]);
+    const loader = new GLTFLoader();
+    loader.load(
+      '/assets/green_bus.glb',
+      (loadedGltf) => {
+        setGltf(loadedGltf.scene);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading bus model:', error);
+      }
+    );
+  }, []);
 
   useFrame((_, delta) => {
-    if (isStopped || isFinished) return;
+    if (isFinished.current) return;
 
-    const safeDelta = Math.min(delta, 0.1);
-    const newProgress = progress + safeDelta / duration;
-
-    if (newProgress >= 1) {
-      setIsFinished(true);
-      setIsStopped(true);
-      if (onFinish) onFinish();
+    if (status === 'paused') {
+      pause();
+      return;
+    } else if (isDwelling) {
+      resume();
       return;
     }
 
-    setProgress(newProgress);
+    const curve = curves[currentIndex];
 
-    const position = curve.getPointAt(newProgress);
-    const tangent = curve.getTangentAt(newProgress);
+    if (!curve) {
+      console.warn('Curve is undefined, skipping this bus');
+      removeOnRoadBus(id);
+      return;
+    }
 
-    busRef.current.position.copy(position);
-    busRef.current.lookAt(position.clone().add(tangent));
+    const { duration, dwell, occupancy } = operationData[currentIndex];
 
-    const currentStop = stations[currentStopIndex];
-    const distance = position.distanceTo(currentStop);
+    if (!hasDewelled.current && busRef.current) {
+      setIsDwelling(true);
+      if (dwell !== 0) {
+        reset((dwell * 1000) / multiplier, () => {
+          setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
+          setIsDwelling(false);
+        });
+        start();
+      } else {
+        setOccupancy(getCurrentOccupancy(occupancy, passengerCapacity));
+        setIsDwelling(false);
+      }
 
-    if (distance < stopThreshold) {
-      setIsStopped(true);
-      setCurrentPassengers(passengerData[currentStopIndex]);
-      console.log(
-        `Bus stopped at Station ${currentStopIndex} - Passengers: ${passengerData[currentStopIndex]}`
-      );
+      hasDewelled.current = true;
 
-      setTimeout(() => {
-        if (!isFinished) {
-          setIsStopped(false);
-          setCurrentStopIndex((prevIndex) => (prevIndex + 1) % stations.length);
-        }
-      }, 2000); //1000ms = 1s
+      const position = curve.getPointAt(0);
+      const tangent = curve.getTangentAt(0);
+      busRef.current.position.copy(position);
+      busRef.current.lookAt(position.clone().add(tangent));
+      return;
+    }
+
+    const newProgress = progress.current + delta / (duration / multiplier);
+    progress.current = newProgress;
+
+    if (newProgress >= 1) {
+      if (currentIndex < operationData.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        progress.current = 0;
+        hasDewelled.current = false;
+      } else {
+        isFinished.current = true;
+        removeOnRoadBus(id);
+      }
+      return;
+    }
+
+    if (busRef.current) {
+      const position = curve.getPointAt(newProgress);
+      const tangent = curve.getTangentAt(newProgress);
+      busRef.current.position.copy(position);
+      busRef.current.lookAt(position.clone().add(tangent));
     }
   });
 
   return (
     <>
-      <mesh ref={busRef}>
-        <primitive
-          object={gltf.scene.clone()}
-          scale={7.5}
-          rotation={[0, Math.PI, 0]}
-          position={[3.5, 0, 4]}
-        />
+      <group ref={busRef}>
+        {gltf ? (
+          <primitive
+            object={gltf}
+            scale={[3.5, 3.5, 3.5]}
+            rotation={[0, 0, 0]}
+          />
+        ) : (
+          <Box />
+        )}
         <Html position={[0, 18, 0]} center>
-          <div
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              color: 'white',
-              padding: '8px',
-              borderRadius: '50%',
-              width: '20px',
-              height: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '12px',
-              border: '1px solid white',
-              boxShadow: '0px 2px 5px rgba(0,0,0,0.3)',
-              textAlign: 'center',
-            }}
-          >
-            {currentPassengers}
-          </div>
+          {isDwelling ? (
+            <div
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                color: 'white',
+                padding: '0',
+                borderRadius: '50%',
+                width: '38px',
+                height: '38px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '18px',
+                border: '2px solid white',
+                boxShadow: '0px 6px 10px rgba(0,0,0,0.3)',
+                textAlign: 'center',
+                transition: 'all 0.1s ease-in-out',
+              }}
+            >
+              <LiaUserClockSolid style={{ fontSize: '20px' }} />
+            </div>
+          ) : (
+            <div
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: 'white',
+                padding: '8px',
+                borderRadius: '50%',
+                width: '33px',
+                height: '33px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '15px',
+                border: '1px solid white',
+                boxShadow: '0px 4px 8px rgba(0,0,0,0.3)',
+                textAlign: 'center',
+                transition: 'all 0.1s ease-in-out',
+              }}
+            >
+              {occupancy}
+            </div>
+          )}
         </Html>
-      </mesh>
+      </group>
     </>
+  );
+}
+
+function Box() {
+  return (
+    <mesh scale={10}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="yellow" />
+    </mesh>
   );
 }

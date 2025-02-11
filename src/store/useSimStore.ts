@@ -1,8 +1,9 @@
 import { OutputDict, ProcessedPolicyOutputData, TimerStatus } from '@/types';
 import { create } from 'zustand';
 
-type SimStoreState = {
+export type SimStoreState = {
   debuge: boolean;
+  view: { pos: 'topView' | 'rotatedSouth' | 'rotatedNorth' };
   selectedOutput: {
     name: string;
     value: OutputDict;
@@ -37,6 +38,7 @@ type SimStoreState = {
 
 type SimStoreActions = {
   toggleDebug: () => void;
+  setView: (view: SimStoreState['view']) => void;
   setSelectedOutput: (name: string, outputVal: NonNullable<OutputDict>) => void;
   startSimulation: () => void;
   resetSimulation: () => void;
@@ -53,6 +55,7 @@ type SimStore = SimStoreState & SimStoreActions;
 
 const defaultState: SimStoreState = {
   debuge: true,
+  view: { pos: 'rotatedSouth' },
   selectedOutput: null,
   timer: { status: 'idle', multiplier: 50, nextBusIndex: -1 },
   busOperation: {
@@ -77,18 +80,21 @@ export const useSimStore = create<SimStore>()((set, get) => ({
   ...defaultState,
 
   toggleDebug: () => set({ debuge: !get().debuge }),
-
+  setView: (view) => set({ view }),
   setSelectedOutput: (name, outputVal) => {
     const busTimeTable = Object.keys(outputVal).map(Number);
     const buses = Object.values(outputVal);
     const busNum = buses.length;
     const stopNum = buses[0].length + 1;
-    const passengerCapacity = get().busOperation.passengerCapacity; 
-  
+    const passengerCapacity = get().busOperation.passengerCapacity;
+
     const totalOperationTime =
       busTimeTable[busTimeTable.length - 1] +
-      buses[buses.length - 1].reduce((acc, { dwell, duration }) => acc + dwell + duration, 0);
-  
+      buses[buses.length - 1].reduce(
+        (acc, { dwell, duration }) => acc + dwell + duration,
+        0
+      );
+
     let totalWaitingTime = 0;
     let totalTravelTime = 0;
     let totalHoldingTime = 0;
@@ -97,65 +103,74 @@ export const useSimStore = create<SimStore>()((set, get) => ({
     let totalTrips = 0;
     let totalPassengers = 0;
     let totalBusesOperated = 0;
-    let totalBunching = 0;  
+    let totalBunching = 0;
     const lastDepartureTime: { [key: string]: number } = {};
     const idealInterval = totalOperationTime / totalBusesOperated;
     const lastBusArrivalTimes: { [stopId: string]: number } = {};
-    
+
     const historicalIntervals: number[] = [];
-buses.forEach((bus, busIndex) => {
-  if (busIndex > 0) {
-    const interval = busTimeTable[busIndex] - busTimeTable[busIndex - 1];
-    historicalIntervals.push(interval);
-  }
-});
-const avgInterval = historicalIntervals.length > 0
-  ? historicalIntervals.reduce((sum, v) => sum + v, 0) / historicalIntervals.length
-  : totalOperationTime / busNum;
-
-const bunchingThreshold = Math.max(avgInterval * 0.5, 30);
-
-buses.forEach((bus, busIndex) => {
-  const busStartTime = busTimeTable[busIndex];
-  let busEndTime = busStartTime;
-
-  bus.forEach((stop, stopIndex) => {
-    const stopId = `${stop.from}-${stop.to}`;
-    const arrivalTime = busEndTime;
-    busEndTime += stop.dwell + stop.duration;
-
-    if (lastDepartureTime[stopId] !== undefined) {
-      totalWaitingTime += Math.max(0, arrivalTime - lastDepartureTime[stopId]);
-    }
-    lastDepartureTime[stopId] = busEndTime;
-
-    if (!lastBusArrivalTimes[stopId]) {
-      lastBusArrivalTimes[stopId] = arrivalTime;
-    } else {
-      const timeGap = arrivalTime - lastBusArrivalTimes[stopId];
-      if (timeGap < bunchingThreshold && stopIndex > 0) {
-        totalBunching++;
-        console.log(`Bunching detected! Stop: ${stopId}, Gap: ${timeGap}, Threshold: ${bunchingThreshold}`);
+    buses.forEach((bus, busIndex) => {
+      if (busIndex > 0) {
+        const interval = busTimeTable[busIndex] - busTimeTable[busIndex - 1];
+        historicalIntervals.push(interval);
       }
-      lastBusArrivalTimes[stopId] = arrivalTime;
-    }
+    });
+    const avgInterval =
+      historicalIntervals.length > 0
+        ? historicalIntervals.reduce((sum, v) => sum + v, 0) /
+          historicalIntervals.length
+        : totalOperationTime / busNum;
 
-    totalHoldingTime += stop.dwell;
-    totalDwellStops++;
-    totalTrips++;
-    totalPassengers += stop.occupancy[1] * passengerCapacity;
-  });
+    const bunchingThreshold = Math.max(avgInterval * 0.5, 30);
 
-  totalTravelTime += busEndTime - busStartTime;
-  totalBusesOperated++;
-});
+    buses.forEach((bus, busIndex) => {
+      const busStartTime = busTimeTable[busIndex];
+      let busEndTime = busStartTime;
 
-  
-    const averageWaitingTime = totalStops > 0 ? totalWaitingTime / totalStops : 0;
+      bus.forEach((stop, stopIndex) => {
+        const stopId = `${stop.from}-${stop.to}`;
+        const arrivalTime = busEndTime;
+        busEndTime += stop.dwell + stop.duration;
+
+        if (lastDepartureTime[stopId] !== undefined) {
+          totalWaitingTime += Math.max(
+            0,
+            arrivalTime - lastDepartureTime[stopId]
+          );
+        }
+        lastDepartureTime[stopId] = busEndTime;
+
+        if (!lastBusArrivalTimes[stopId]) {
+          lastBusArrivalTimes[stopId] = arrivalTime;
+        } else {
+          const timeGap = arrivalTime - lastBusArrivalTimes[stopId];
+          if (timeGap < bunchingThreshold && stopIndex > 0) {
+            totalBunching++;
+            console.log(
+              `Bunching detected! Stop: ${stopId}, Gap: ${timeGap}, Threshold: ${bunchingThreshold}`
+            );
+          }
+          lastBusArrivalTimes[stopId] = arrivalTime;
+        }
+
+        totalHoldingTime += stop.dwell;
+        totalDwellStops++;
+        totalTrips++;
+        totalPassengers += stop.occupancy[1] * passengerCapacity;
+      });
+
+      totalTravelTime += busEndTime - busStartTime;
+      totalBusesOperated++;
+    });
+
+    const averageWaitingTime =
+      totalStops > 0 ? totalWaitingTime / totalStops : 0;
     const averageTravelTime = totalTrips > 0 ? totalTravelTime / totalTrips : 0;
-    const averageHoldingTime = totalDwellStops > 0 ? totalHoldingTime / totalDwellStops : 0;
-    const averageOccupancy = totalBusesOperated > 0 ? totalPassengers / totalBusesOperated : 0;
-  
+    const averageHoldingTime =
+      totalDwellStops > 0 ? totalHoldingTime / totalDwellStops : 0;
+    const averageOccupancy =
+      totalBusesOperated > 0 ? totalPassengers / totalBusesOperated : 0;
+
     set({
       selectedOutput: {
         name,
@@ -168,21 +183,24 @@ buses.forEach((bus, busIndex) => {
       },
       busStatistics: {
         totalWaitingTime: totalTrips > 0 ? totalWaitingTime / totalTrips : 0,
-        totalTravelTime: totalBusesOperated > 0 ? totalTravelTime / totalBusesOperated : 0,
-        totalHoldingTime: totalDwellStops > 0 ? totalHoldingTime / totalDwellStops : 0,
-        totalPassengers: totalBusesOperated > 0 ? totalPassengers / totalBusesOperated : 0,
+        totalTravelTime:
+          totalBusesOperated > 0 ? totalTravelTime / totalBusesOperated : 0,
+        totalHoldingTime:
+          totalDwellStops > 0 ? totalHoldingTime / totalDwellStops : 0,
+        totalPassengers:
+          totalBusesOperated > 0 ? totalPassengers / totalBusesOperated : 0,
         totalBusesOperated: busNum,
         totalBunching: 0,
       },
     });
   },
-  
 
   setPassengerCapacity: (value) => {
     set((state) => {
       const updatedTotalPassengers = state.selectedOutput
-        ? state.selectedOutput.buses.flat().reduce(
-            (sum, stop) => sum + stop.occupancy[1] * value, 0)
+        ? state.selectedOutput.buses
+            .flat()
+            .reduce((sum, stop) => sum + stop.occupancy[1] * value, 0)
         : 0;
 
       return {
@@ -235,19 +253,25 @@ buses.forEach((bus, busIndex) => {
     set((state) => {
       const { busTimeTable, buses } = state.selectedOutput!;
       const currBusIndex = state.timer.nextBusIndex;
-  
+
       if (currBusIndex === -1 || currBusIndex >= busTimeTable.length) {
         return { timer: { ...state.timer, nextBusIndex: -1 } };
       }
-  
+
       const id = busTimeTable[currBusIndex];
       const dispatchedBus = buses[currBusIndex];
-  
+
       return {
         busOperation: {
           ...state.busOperation,
-          busesOnRoad: [...state.busOperation.busesOnRoad, { id, value: dispatchedBus }],
-          dispatchedBuses: [...state.busOperation.dispatchedBuses, { id, value: dispatchedBus }],
+          busesOnRoad: [
+            ...state.busOperation.busesOnRoad,
+            { id, value: dispatchedBus },
+          ],
+          dispatchedBuses: [
+            ...state.busOperation.dispatchedBuses,
+            { id, value: dispatchedBus },
+          ],
         },
         timer: {
           ...state.timer,
@@ -255,10 +279,10 @@ buses.forEach((bus, busIndex) => {
         },
       };
     });
-  },  
+  },
 
   setTimerStatus: (status) => set({ timer: { ...get().timer, status } }),
-  
+
   setOperationTime: (second) => {
     set({
       busOperation: {
@@ -268,7 +292,8 @@ buses.forEach((bus, busIndex) => {
     });
   },
 
-  setTimerMultiplier: (multiplier) => set({ timer: { ...get().timer, multiplier } }),
+  setTimerMultiplier: (multiplier) =>
+    set({ timer: { ...get().timer, multiplier } }),
 
   resetSimulation: () => {
     set({
@@ -279,7 +304,8 @@ buses.forEach((bus, busIndex) => {
 
   pauseSimulation: () => {
     set((state) => {
-      const currentTime = state.busOperation.breakpoint + state.busOperation.operationTime;
+      const currentTime =
+        state.busOperation.breakpoint + state.busOperation.operationTime;
       return {
         timer: {
           ...state.timer,
