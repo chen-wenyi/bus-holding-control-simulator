@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { SCALE_FACTOR } from './constants';
-import { stations } from './stations2';
+import { stations } from './stations';
 
 function SingleBusStop({
   position,

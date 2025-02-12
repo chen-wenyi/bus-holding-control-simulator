@@ -1,7 +1,7 @@
 import { Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { stations } from './stations2';
 import { SCALE_FACTOR } from './constants';
+import { stations } from './stations';
 
 function DebugPoints({
   points,
@@ -68,10 +68,14 @@ export default function RouteLine({ visible = true }: { visible?: boolean }) {
       {visible && (
         <>
           <Line points={points} color='white' lineWidth={7} dashed={false} />
-          
+
           <DebugPoints points={stationPoints} color='grey' visible={visible} />
-          
-          <DebugPoints points={inflectionPoints} color='white' visible={false} />
+
+          <DebugPoints
+            points={inflectionPoints}
+            color='white'
+            visible={false}
+          />
         </>
       )}
     </>
