@@ -64,7 +64,7 @@ export function Bus({
   // Apply initial progress
   useEffect(() => {
     if (currentIndex !== 0) {
-      let { duration, dwell, initialProgress } = operationData[currentIndex];
+      const { duration, dwell, initialProgress } = operationData[currentIndex];
       let breakpoint: number;
       if (!initialProgressApplied.current && initialProgress) {
         initialProgressApplied.current = true;
@@ -124,9 +124,9 @@ export function Bus({
       return;
     }
 
-    let { duration, dwell, occupancy, initialProgress } =
+    const { duration, occupancy, initialProgress } =
       operationData[currentIndex];
-
+    let dwell = operationData[currentIndex].dwell;
     let breakpoint: number;
 
     if (!initialProgressApplied.current && initialProgress) {

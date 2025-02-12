@@ -5,7 +5,7 @@ import { OrbitControls } from 'three-stdlib';
 
 const DEFAULT_CAMERA_POSITION: [number, number, number] = [0, 0, 0];
 
-export const AdjustCamera = memo(
+const AdjustCamera = memo(
   ({
     mapPosition = DEFAULT_CAMERA_POSITION,
     controlsRef,
@@ -47,3 +47,6 @@ export const AdjustCamera = memo(
     return null;
   }
 );
+
+AdjustCamera.displayName = 'AdjustCamera';
+export default AdjustCamera;

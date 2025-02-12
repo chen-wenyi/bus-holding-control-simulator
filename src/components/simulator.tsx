@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useRef } from 'react';
 import { OrbitControls as ThreeOrbitControls } from 'three-stdlib';
-import { AdjustCamera } from './AdjustCamera';
+import AdjustCamera from './AdjustCamera';
 import { Bus } from './bus';
 import BusStops from './busstop';
 import Characters from './character';
