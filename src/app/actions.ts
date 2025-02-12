@@ -42,11 +42,19 @@ const processZipFileToJson = (buffer: Buffer) => {
 const normalizedStartTime = (map: OutputDict) => {
   const keys = Object.keys(map).map((k) => parseInt(k));
   const offset = keys[0];
-  console.log('offset:', offset)
+  console.log('offset:', offset);
   const processedKeys = keys.map((k) => k - offset);
   const newMap: OutputDict = {};
   processedKeys.forEach((newKey, idx) => {
-    newMap[newKey] = map[keys[idx]];
+    newMap[newKey] = map[keys[idx]].map((data) => {
+      return {
+        ...data,
+        operationTime: [
+          data.operationTime[0] - offset,
+          data.operationTime[1] - offset,
+        ],
+      };
+    });
   });
   return newMap;
 };
@@ -74,15 +82,16 @@ const getProcessedData = (content: string) => {
   const keyPointId: string[] = [];
   let isLookingForStopFlag = true;
 
-  let prevStopId: undefined | string
+  let prevStopId: undefined | string;
   policyOutputData.forEach((data) => {
     if (isLookingForStopFlag) {
       if (parseInt(data.stop) !== -1) {
-        if (prevStopId !== data.stop) { // rule out the incorrect data
+        if (prevStopId !== data.stop) {
+          // rule out the incorrect data
           // looking for stop
           keyPointId.push(data.id);
           isLookingForStopFlag = false;
-          prevStopId = data.stop
+          prevStopId = data.stop;
         }
       }
     } else {
@@ -94,7 +103,8 @@ const getProcessedData = (content: string) => {
     }
   });
 
-  const timeId = policyOutputData[0].time;
+  const timeId = parseInt(policyOutputData[0].time);
+  let startTime = timeId;
 
   const res = { keyPointId, len: keyPointId.length };
 
@@ -117,11 +127,13 @@ const getProcessedData = (content: string) => {
         to: toStopData.stop,
         dwell,
         duration,
+        operationTime: [startTime, startTime + duration + dwell],
         occupancy,
       });
+      startTime = startTime + duration + dwell;
     }
   });
-  return { timeId: parseInt(timeId), processedOutputData };
+  return { timeId: timeId, processedOutputData };
 };
 
 export async function uploadAction(formData: FormData) {

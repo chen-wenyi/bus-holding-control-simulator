@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function useTimer() {
   const timer = useSimStore((state) => state.timer);
-  const { breakpoint, offset } = useSimStore((state) => state.busOperation);
+  const { breakpoint } = useSimStore((state) => state.busOperation);
   const setTimerStatus = useSimStore((state) => state.setTimerStatus);
   const setOperationTime = useSimStore((state) => state.setOperationTime);
+
   const { multiplier, status } = timer;
   const totalOperationTime = useSimStore(
     (state) => state.selectedOutput?.totalOperationTime
@@ -22,13 +23,16 @@ export default function useTimer() {
     }
     const currentTime = performance.now();
     const elapsedTime = (currentTime - startTime.current) * multiplier;
-    if (totalOperationTime && elapsedTime >= totalOperationTime * 1000) {
+
+    if (
+      totalOperationTime &&
+      elapsedTime >= (totalOperationTime - breakpoint) * 1000
+    ) {
       setTimerStatus('ended');
     } else {
       setTime(elapsedTime / 1000);
       setOperationTime(elapsedTime / 1000);
       requestRef.current = requestAnimationFrame(animate); // Request the next frame
-      // Update your logic here based on `elapsedTime`
     }
   };
 
@@ -40,9 +44,9 @@ export default function useTimer() {
     } else if (status === 'idle') {
       setTime(0);
     } else if (status === 'ended') {
-      if (totalOperationTime) {
-        setTime(totalOperationTime);
-      }
+      // if (totalOperationTime) {
+      //   setTime(totalOperationTime);
+      // }
     } else if (status === 'paused') {
       setTime(0);
     }
@@ -53,7 +57,7 @@ export default function useTimer() {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [status, totalOperationTime]);
+  }, [status, totalOperationTime, breakpoint]);
 
   const { days, hours, minutes, seconds } = getDetailedTime(breakpoint + time);
 

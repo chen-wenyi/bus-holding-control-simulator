@@ -1,6 +1,8 @@
 import { formatTime, getDetailedTime } from '@/lib/utils';
 import { useSimStore } from '@/store/useSimStore';
+import { debounce } from 'lodash';
 import { Clock } from 'lucide-react';
+import { useCallback } from 'react';
 import { Slider } from './ui/slider';
 
 const OperationProgress = ({ elapse }: { elapse: number }) => {
@@ -8,10 +10,23 @@ const OperationProgress = ({ elapse }: { elapse: number }) => {
     (state) => state.selectedOutput?.totalOperationTime
   );
   const { offset } = useSimStore((state) => state.busOperation);
-
+  const updateSimulationProgress = useSimStore(
+    (state) => state.updateSimulationProgress
+  );
+  const removeOnRoadBus = useSimStore((state) => state.removeOnRoadBus);
   const currentTime = elapse;
 
   const timeElapse = getDetailedTime(currentTime);
+
+  const onValueChange = useCallback(
+    debounce((v: number[]) => {
+      removeOnRoadBus();
+      setTimeout(() => {
+        updateSimulationProgress(v[0]);
+      }, 500);
+    }, 100),
+    []
+  );
 
   return (
     <div>
@@ -28,10 +43,12 @@ const OperationProgress = ({ elapse }: { elapse: number }) => {
         </div>
       </div>
       <Slider
+        // defaultValue={[elapse]}
         defaultValue={[0]}
         max={totalOperationTime}
         min={0}
         value={[elapse]}
+        onValueChange={onValueChange}
         step={1}
       />
     </div>

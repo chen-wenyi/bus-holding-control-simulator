@@ -11,7 +11,9 @@ export interface ProcessedPolicyOutputData {
   to: string;
   duration: number;
   dwell: number;
+  operationTime: [number, number];
   occupancy: [number, number];
+  initialProgress?: number;
 }
 
 export type OutputDict = { [key: number]: ProcessedPolicyOutputData[] };

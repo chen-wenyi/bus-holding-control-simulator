@@ -33,15 +33,25 @@ export function Bus({
   const status = useSimStore((store) => store.timer.status);
   const busRef = useRef<THREE.Group>(null);
   const progress = useRef(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const idx = operationData.findIndex(
+      ({ initialProgress }) => !!initialProgress
+    );
+    return idx === -1 ? 0 : idx;
+  });
+
   const isFinished = useRef(false);
   const [isDwelling, setIsDwelling] = useState(false);
   const hasDewelled = useRef(false);
+  const initialProgressApplied = useRef(false);
   const passengerCapacity = useSimStore(
     (store) => store.busOperation.passengerCapacity
   );
   const [occupancy, setOccupancy] = useState(
-    getCurrentOccupancy(operationData[0].occupancy, passengerCapacity)
+    getCurrentOccupancy(
+      operationData[currentIndex].occupancy,
+      passengerCapacity
+    )
   );
 
   const { start, pause, reset, resume } = useMemo(() => {
@@ -50,6 +60,36 @@ export function Bus({
 
   // Load the GLTF model
   const [gltf, setGltf] = useState<THREE.Group | null>(null);
+
+  // Apply initial progress
+  useEffect(() => {
+    if (currentIndex !== 0) {
+      let { duration, dwell, initialProgress } = operationData[currentIndex];
+      let breakpoint: number;
+      if (!initialProgressApplied.current && initialProgress) {
+        initialProgressApplied.current = true;
+        breakpoint = (dwell + duration) * initialProgress;
+        const curve = curves[currentIndex];
+        if (breakpoint < dwell) {
+          const position = curve.getPointAt(0);
+          const tangent = curve.getTangentAt(0);
+          if (busRef.current) {
+            busRef.current.position.copy(position);
+            busRef.current.lookAt(position.clone().add(tangent));
+          }
+        } else {
+          hasDewelled.current = true;
+          progress.current = (breakpoint - dwell) / duration;
+          if (busRef.current) {
+            const position = curve.getPointAt(progress.current);
+            const tangent = curve.getTangentAt(progress.current);
+            busRef.current.position.copy(position);
+            busRef.current.lookAt(position.clone().add(tangent));
+          }
+        }
+      }
+    }
+  }, [currentIndex, operationData, curves, busRef]);
 
   useEffect(() => {
     const loader = new GLTFLoader();
@@ -84,7 +124,22 @@ export function Bus({
       return;
     }
 
-    const { duration, dwell, occupancy } = operationData[currentIndex];
+    let { duration, dwell, occupancy, initialProgress } =
+      operationData[currentIndex];
+
+    let breakpoint: number;
+
+    if (!initialProgressApplied.current && initialProgress) {
+      initialProgressApplied.current = true;
+      breakpoint = (dwell + duration) * initialProgress;
+      if (breakpoint < dwell) {
+        dwell = dwell - breakpoint;
+      }
+      // else {
+      //   hasDewelled.current = true;
+      //   progress.current = (breakpoint - dwell) / duration;
+      // }
+    }
 
     if (!hasDewelled.current && busRef.current) {
       setIsDwelling(true);

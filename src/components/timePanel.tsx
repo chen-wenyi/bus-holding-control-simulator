@@ -69,7 +69,9 @@ export default function TimePanel() {
               <Button variant='destructive' onClick={onReset}>
                 Reset Simulation
               </Button>
-              {status === 'paused' ? (
+              {status === 'ended' ? (
+                <></>
+              ) : status === 'paused' ? (
                 <Button onClick={onStart}>Start</Button>
               ) : (
                 <Button variant='default' onClick={onPause}>
