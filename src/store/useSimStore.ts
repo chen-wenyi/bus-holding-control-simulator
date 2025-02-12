@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
+
 export type SimStoreState = {
   debuge: boolean;
   view: { pos: 'topView' | 'rotatedSouth' | 'rotatedNorth' };
@@ -29,10 +30,11 @@ export type SimStoreState = {
     busesOnRoad: { value: ProcessedPolicyOutputData[]; id: number }[];
   };
   busStatistics: {
-    totalWaitingTime: number;
-    totalTravelTime: number;
-    totalHoldingTime: number;
-    totalPassengers: number;
+    avgWaitingTime: number;
+    avgTravelTime: number;
+    avgBusTravelTime: number;
+    avgHoldingTime: number;
+    avgOccupancy: number;
     totalBusesOperated: number;
     totalBunching: number;
   };
@@ -70,10 +72,11 @@ const defaultState: SimStoreState = {
     dispatchedBuses: [],
   },
   busStatistics: {
-    totalWaitingTime: 0,
-    totalTravelTime: 0,
-    totalHoldingTime: 0,
-    totalPassengers: 0,
+    avgWaitingTime: 0,
+    avgTravelTime: 0,
+    avgBusTravelTime: 0,
+    avgHoldingTime: 0,
+    avgOccupancy: 0,
     totalBusesOperated: 0,
     totalBunching: 0,
   },
@@ -81,7 +84,7 @@ const defaultState: SimStoreState = {
 
 export const useSimStore = create<SimStore>()(
   devtools(
-    immer((set) => ({
+    immer((set, get) => ({
       ...defaultState,
       toggleDebug: () =>
         set(
@@ -94,14 +97,103 @@ export const useSimStore = create<SimStore>()(
       setView: (view) => set({ view }, false, 'setView'),
       setSelectedOutput: (name, outputVal) => {
         const busTimeTable = Object.keys(outputVal).map(Number);
+        if (busTimeTable.length === 0) return;
+
         const buses = Object.values(outputVal);
-        const busNum = Object.entries(outputVal).length;
+        const busNum = buses.length;
         const stopNum = outputVal[0].length + 1;
+        const passengerCapacity = get().busOperation.passengerCapacity;
+
         const totalOperationTime =
           busTimeTable[busTimeTable.length - 1] +
           buses[buses.length - 1].reduce((accumulator, { dwell, duration }) => {
             return accumulator + dwell + duration;
           }, 0);
+        
+        let totalWaitingTime = 0;
+        let totalPassengerTravelTime = 0;
+        let totalPassengersCounted = 0;
+        let totalHoldingTime = 0;
+        const holdingDurations: number[] = [];
+        let totalBunching = 0;
+        let totalOccupancy = 0;
+        let totalBusCount = 0;
+        const lastDepartureTime: { [stopId: string]: number } = {};
+        const stopArrivals: { [stopId: string]: number[] } = {};
+        let totalBusTripTime = 0;
+
+        buses.forEach((bus, busIndex) => {
+          const busStartTime = busTimeTable[busIndex];
+          let busEndTime = busStartTime;
+          let busOccupancySum = 0;
+          let busStopCount = 0;
+
+          bus.forEach((stop, stopIndex) => {
+            const stopId = `${stop.from}-${stop.to}`;
+            const arrivalTime = busEndTime;
+
+            busOccupancySum += stop.occupancy[1];
+            busStopCount++;
+            busEndTime += stop.dwell + stop.duration;
+
+            if (busStopCount > 0) {
+              totalOccupancy += busOccupancySum / busStopCount;
+              totalBusCount++;
+            }
+
+            // Avg Wating Time
+            if (lastDepartureTime[stopId] !== undefined) {
+              totalWaitingTime += Math.max(0, arrivalTime - lastDepartureTime[stopId]);
+            }
+            lastDepartureTime[stopId] = busEndTime;
+
+            // Passenger Travel Time
+            const passengersAtStop = stop.occupancy[1] * passengerCapacity;
+            totalPassengerTravelTime += stop.duration * passengersAtStop;
+            totalPassengersCounted += passengersAtStop;
+
+            //Bus Travel Time
+            if (stopIndex === bus.length - 1) {
+              totalBusTripTime += (busEndTime - busStartTime);
+            }
+
+            //Bus Holding Time
+            if (stop.dwell > 0) {
+              totalHoldingTime += stop.dwell;
+              holdingDurations.push(stop.dwell);
+            }
+
+            // Bus Bunching
+            const bunchingThreshold = 60;
+            if (!stopArrivals[stopId]) stopArrivals[stopId] = [];
+            stopArrivals[stopId].push(arrivalTime);
+            stopArrivals[stopId] = stopArrivals[stopId].filter(
+              (time) => arrivalTime - time <= bunchingThreshold
+            );
+            if (stopArrivals[stopId].length >= 2) {
+              totalBunching++;
+            }
+
+          });
+        });
+
+        // Final Avg Results
+        const averageWaitingTime = totalPassengersCounted > 0 ? totalWaitingTime / totalPassengersCounted : 0;
+        const averagePassengerTravelTime = totalPassengersCounted > 0
+          ? totalPassengerTravelTime / totalPassengersCounted
+          : 0;
+        const averageBusTravelTime = totalBusTripTime > 0 ? (totalBusTripTime / busNum) / 60 : 0;
+
+        holdingDurations.sort((a, b) => a - b);
+        const validHoldingTimes = holdingDurations.slice(
+          0, Math.floor(holdingDurations.length * 0.90)
+        );
+        const averageHoldingTime = validHoldingTimes.length > 0 
+          ? validHoldingTimes.reduce((sum, val) => sum + val, 0) / validHoldingTimes.length
+          : 0;
+
+        const averageOccupancy = totalBusCount > 0 ? (totalOccupancy / totalBusCount) * 100 : 0;
+
         set(
           {
             selectedOutput: {
@@ -113,10 +205,20 @@ export const useSimStore = create<SimStore>()(
               totalOperationTime,
               value: outputVal,
             },
+            busStatistics: {
+              avgWaitingTime: averageWaitingTime,
+              avgTravelTime: averagePassengerTravelTime,
+              avgBusTravelTime: averageBusTravelTime,
+              avgHoldingTime: averageHoldingTime,
+              avgOccupancy: averageOccupancy,
+              totalBusesOperated: busNum,
+              totalBunching: totalBunching,
+            },
           },
           false,
           'setSelectedOutput'
         );
+
       },
       startSimulation: () => {
         set(

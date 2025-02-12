@@ -44,6 +44,7 @@ const OperationProgress = ({ elapse }: { elapse: number }) => {
       </div>
       <Slider
         // defaultValue={[elapse]}
+        className='cursor-pointer'
         defaultValue={[0]}
         max={totalOperationTime}
         min={0}
