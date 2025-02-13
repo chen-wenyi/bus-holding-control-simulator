@@ -5,16 +5,19 @@ import AdmZip from 'adm-zip';
 import Papa from 'papaparse';
 import {
   OutputDict,
+  Policy,
   PolicyOutputData,
   ProcessedPolicyOutputData,
+  Statistics,
 } from '../types';
 
-const processZipFileToJson = (buffer: Buffer) => {
+const processZipFileToJson = (buffer: Buffer): Policy | undefined => {
   try {
     const zip = new AdmZip(buffer);
     const zipEntries = zip.getEntries();
     const map: { [key: number]: ProcessedPolicyOutputData[] } = {};
 
+    let totalBunching = 0;
     zipEntries.forEach((entry) => {
       const fileName = entry.entryName;
       if (!fileName.includes('__MACOSX') && fileName.includes('.csv')) {
@@ -31,12 +34,65 @@ const processZipFileToJson = (buffer: Buffer) => {
           );
         }
         map[res.timeId] = res.processedOutputData;
+        totalBunching += res.bunching;
       }
     });
-    return normalizedStartTime(map);
+
+    const operationData = normalizedStartTime(map);
+
+    return {
+      statistics: {
+        ...getStatistics(operationData),
+        totalBunching,
+      },
+      operationData,
+    };
   } catch (err) {
     console.error('Error unzipping file:', err);
   }
+};
+
+const getStatistics = (
+  operationData: OutputDict
+): Omit<Statistics, 'totalBunching'> => {
+  const services = Object.values(operationData);
+  const serviceLength = services.length;
+  const lastService = services[serviceLength - 1];
+  const totalOperationTime =
+    lastService[lastService.length - 1].operationTime[1];
+
+  const waitingTimes: number[] = [];
+  const travelTimes: number[] = [];
+  const dwellingTimes: number[] = [];
+  const occupancies: number[] = [];
+
+  services.forEach((service) => {
+    const start = service[0].operationTime[0];
+    const end = service[service.length - 1].operationTime[1];
+    service.forEach(({ dwell, duration, occupancy }) => {
+      waitingTimes.push(dwell + duration);
+      dwellingTimes.push(dwell);
+      occupancies.push(occupancy[1]);
+    });
+    travelTimes.push(end - start);
+  });
+
+  const avgWaitingTime =
+    waitingTimes.reduce((acc, curr) => acc + curr, 0) / waitingTimes.length;
+  const avgBusTravelTime =
+    travelTimes.reduce((acc, curr) => acc + curr, 0) / travelTimes.length;
+  const avgDwellingTime =
+    dwellingTimes.reduce((acc, curr) => acc + curr, 0) / dwellingTimes.length;
+  const avgOccupancy =
+    occupancies.reduce((acc, curr) => acc + curr, 0) / occupancies.length;
+
+  return {
+    avgWaitingTime,
+    avgBusTravelTime,
+    avgDwellingTime,
+    avgOccupancy,
+    totalOperationTime,
+  };
 };
 
 const normalizedStartTime = (map: OutputDict) => {
@@ -83,6 +139,8 @@ const getProcessedData = (content: string) => {
   let isLookingForStopFlag = true;
 
   let prevStopId: undefined | string;
+  let bunching = 0;
+  let bunchingFlag = false;
   policyOutputData.forEach((data) => {
     if (isLookingForStopFlag) {
       if (parseInt(data.stop) !== -1) {
@@ -92,6 +150,10 @@ const getProcessedData = (content: string) => {
           keyPointId.push(data.id);
           isLookingForStopFlag = false;
           prevStopId = data.stop;
+          bunchingFlag = false;
+        } else if (!bunchingFlag) {
+          bunching++;
+          bunchingFlag = true;
         }
       }
     } else {
@@ -133,7 +195,7 @@ const getProcessedData = (content: string) => {
       startTime = startTime + duration + dwell;
     }
   });
-  return { timeId: timeId, processedOutputData };
+  return { timeId: timeId, processedOutputData, bunching };
 };
 
 export async function uploadAction(formData: FormData) {
@@ -146,13 +208,18 @@ export async function uploadAction(formData: FormData) {
 
   const fileData = Buffer.from(await file.arrayBuffer());
 
-  await put(
-    `outputs/${outputName}`,
-    JSON.stringify(processZipFileToJson(fileData)),
-    { access: 'public' }
-  );
+  const body = processZipFileToJson(fileData);
+  if (body) {
+    await uploadToBlob(outputName, body);
+  }
 }
 
 export async function delOutputs(url: string) {
   await del(url);
+}
+
+async function uploadToBlob(fileName: string, body: Policy) {
+  return await put(`outputs/${fileName}`, JSON.stringify(body), {
+    access: 'public',
+  });
 }

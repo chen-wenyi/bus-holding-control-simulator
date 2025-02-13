@@ -13,9 +13,9 @@ const DebugButton = () => {
         id='debug-mode'
         checked={isDebug}
         onClick={toggleDebug}
-        className="data-[state=checked]:bg-[#2E5F73] data-[state=checked]:border-[#2E5F73] transition-colors duration-300"
+        className='data-[state=checked]:bg-[#2E5F73] data-[state=checked]:border-[#2E5F73] transition-colors duration-300'
       />
-      <Label htmlFor='debug-mode'>Debug Mode</Label>
+      <Label htmlFor='debug-mode'>Minimal Mode</Label>
     </div>
   );
 };

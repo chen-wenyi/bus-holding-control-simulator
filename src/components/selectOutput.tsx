@@ -2,7 +2,7 @@
 
 import { delOutputs } from '@/app/actions';
 import { useSimStore } from '@/store/useSimStore';
-import { OutputDict } from '@/types';
+import { Policy } from '@/types';
 import { ListBlobResultBlob } from '@vercel/blob';
 import axios from 'axios';
 import { Bus, LoaderCircle, Waypoints } from 'lucide-react';
@@ -50,7 +50,7 @@ export default function SelectOutput() {
   };
 
   const onOutputClicked = async (blob: ListBlobResultBlob) => {
-    const { data } = await axios.get<OutputDict>('/api/outputs', {
+    const { data } = await axios.get<Policy>('/api/outputs', {
       params: { outputUrl: blob.downloadUrl },
     });
     setSelectedOutput(blob.pathname.replace('outputs/', ''), data);
