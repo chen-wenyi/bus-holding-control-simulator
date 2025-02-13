@@ -35,3 +35,17 @@ export interface TimeLeft {
 }
 
 export type TimerStatus = 'idle' | 'paused' | 'started' | 'ended';
+
+export type Statistics = {
+  avgWaitingTime: number; // avg( duration + dwell time )
+  avgBusTravelTime: number; // bus operation time / bus num
+  avgDwellingTime: number; // avg dwelling time
+  avgOccupancy: number; // avg occupancy
+  totalOperationTime: number; // total time of services
+  totalBunching: number; // from data analysis
+};
+
+export type Policy = {
+  statistics: Statistics;
+  operationData: OutputDict;
+};
