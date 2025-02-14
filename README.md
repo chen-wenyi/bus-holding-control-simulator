@@ -30,6 +30,10 @@ Why use Dev Containers?
 
 ## 2. How to start the application in local environment? 🛠️
 
+### Env
+
+NodeJS >= v22.x
+
 ### Install dependency locally
 
 pnpm install
@@ -49,8 +53,6 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can add a section in your README like this:
 
 ## 3. Continuous Deployment with Vercel 📦
 
