@@ -1,11 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 1. Development with VSCode Dev Containers
 
-## Installation
-npm i --force
+To streamline development and ensure a consistent environment, we recommend using VSCode Dev Containers. This setup allows you to start coding instantly without worrying about dependencies.
 
-## Getting Started
+Why use Dev Containers?
 
-First, run the development server:
+✅ Pre-configured development environment
+
+✅ No need to install dependencies locally
+
+✅ Works across different operating systems
+
+✅ Seamless integration with VSCode
+
+### Getting Started
+
+1. Install Prerequisites
+   - Visual Studio Code
+   - Docker
+   - VSCode Extensions: **Dev Containers**
+2. Clone the Repository
+
+3. Open in VSCode
+
+   - Open the project in VSCode.
+   - When prompted, click R**eopen in Container**.
+   - If not prompted, open the Command Palette (Ctrl + Shift + P / Cmd + Shift + P) and select: **Dev Containers: Reopen in Container**
+
+4. Start Coding! 🚀
+
+## 2. How to start the application in local environment ?
+
+### Install dependency locally
+
+pnpm install
+
+### Getting Started
+
+run the development server:
 
 ```bash
 npm run dev
@@ -19,21 +50,14 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can add a section in your README like this:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Continuous Deployment with Vercel
 
-## Learn More
+This project is configured for CI/CD with Vercel. Every time you merge code into the main branch, a build and deployment process is automatically triggered, ensuring that the latest changes are live without manual intervention.
 
-To learn more about Next.js, take a look at the following resources:
+Deployment Process 1. Push or merge code into the main branch. 2. Vercel automatically builds and deploys the latest version. 3. The live version is updated once the deployment is successful.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🔗 Production URL: [https://bus-holding-control-simulator.vercel.app/](https://bus-holding-control-simulator.vercel.app/)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For more details, visit Vercel Documentation.
