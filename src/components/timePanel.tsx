@@ -92,30 +92,34 @@ export default function TimePanel() {
             <>
               <OperationProgress elapse={timeElapse.distance} />
               <Speedup />
-              <div className="grid grid-cols-2 gap-1 text-sm">
-              <div className="whitespace-nowrap">Next bus at:</div>
-              <div className="text-center">
-                {nextBusDetailedTime ? (
-                  <>
-                    {formatTime(nextBusDetailedTime.hours + offset / 3600)}:
-                    {formatTime(nextBusDetailedTime.minutes)}:
-                    {formatTime(nextBusDetailedTime.seconds)}
-                  </>
-                ) : (
-                  <>06:00:00</>
-                )}
+              <div className='border-t border-gray-400 w-full'>
+                <div className='text-lg font-bold my-2'>Dynamic Service Info</div>
+
+                <div className="grid grid-cols-2 gap-1 text-sm">
+                <div className="whitespace-nowrap">Next bus at:</div>
+                <div className="text-center">
+                  {nextBusDetailedTime ? (
+                    <>
+                      {formatTime(nextBusDetailedTime.hours + offset / 3600)}:
+                      {formatTime(nextBusDetailedTime.minutes)}:
+                      {formatTime(nextBusDetailedTime.seconds)}
+                    </>
+                  ) : (
+                    <>06:00:00</>
+                  )}
+                </div>
+
+                <div className="whitespace-nowrap">Dispatched Buses:</div>
+                <div className="text-center">{dispatchedBuses.length}</div>
+
+                <div className="whitespace-nowrap pb-3">Buses on road:</div>
+                <div className="text-center pb-3">{operationBuses.length}</div>
               </div>
-
-              <div className="whitespace-nowrap">Dispatched Buses:</div>
-            <div className="text-center">{dispatchedBuses.length}</div>
-
-            <div className="whitespace-nowrap pb-3">Buses on road:</div>
-            <div className="text-center pb-3">{operationBuses.length}</div>
           </div>
         </>
       )}
 
-        <div className="border-t border-gray-400 w-full pt-2">
+        <div className="border-t border-gray-400 w-full">
           <BusStatistics />
         </div>
         </>
