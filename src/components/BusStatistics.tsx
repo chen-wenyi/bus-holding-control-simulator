@@ -12,7 +12,9 @@ const BusStatistics = () => {
   const avgDwellingTime = getDetailedTime(busStatistics.avgDwellingTime);
 
   return (
-    <div className='text-sm'>
+    <div className='flex flex-col text-sm'>
+      <div className='text-lg font-bold my-2'>Static Statistics</div>
+
       <div className='grid grid-cols-[1.5fr_1fr] gap-1'>
         <div className='whitespace-nowrap'>Avg Waiting Time:</div>
         <div className='text-left'>
